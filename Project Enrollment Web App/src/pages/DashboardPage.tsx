@@ -161,7 +161,7 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
             <CardDescription>Common tasks to get you started</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Link to="/enroll">
                 <Button className="w-full gap-2" variant="outline">
                   <PlusCircle className="w-4 h-4" />
@@ -174,11 +174,7 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
                   View All Projects
                 </Button>
               </Link>
-              <Button className="w-full gap-2" variant="outline">
-                <Code className="w-4 h-4" />
-                View Documentation
-              </Button>
-            </div>
+                          </div>
           </CardContent>
         </Card>
 
