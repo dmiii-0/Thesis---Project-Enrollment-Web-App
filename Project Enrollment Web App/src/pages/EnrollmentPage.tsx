@@ -542,8 +542,7 @@ Upload your project documentation (PDF) using the project management system.
                     </div>
                   )}
 
-                  {formData.projectType === 'web' && (
-                    <div className="space-y-2">
+              {false && (                    <div className="space-y-2">
                       <Label htmlFor="webFramework">Framework *</Label>
                       <Select
                         value={formData.webFramework}
