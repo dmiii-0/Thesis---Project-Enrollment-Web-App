@@ -32,7 +32,6 @@ export function EnrollmentPage({ user, onLogout }: EnrollmentPageProps) {
     description: '',
     projectType: 'device',
     deviceType: 'arduino',
-    webFramework: 'react',
     visibility: 'public',
     autoInit: true,
   });
@@ -53,7 +52,7 @@ export function EnrollmentPage({ user, onLogout }: EnrollmentPageProps) {
     try {
       // Create Gitea repository
       const repoName = formData.projectName.toLowerCase().replace(/\s+/g, '-');
-      const description = `${formData.projectType === 'device' ? formData.deviceType.toUpperCase() : formData.webFramework} - ${formData.description}`;
+      const description = `${formData.projectType === 'device' ? formData.deviceType.toUpperCase() : 'WEB APP'} - ${formData.description}`;
 
       const repo = await giteaAPI.createRepository({
         name: repoName,
@@ -82,7 +81,7 @@ export function EnrollmentPage({ user, onLogout }: EnrollmentPageProps) {
       }
         } else {
           // Create Docker manifest for web app
-          const dockerfile = generateDockerfile(formData.webFramework);
+          const dockerfile = generateDockerfile('WEB APP');
           await giteaAPI.createFile(
             repoName,
             'Dockerfile',
@@ -142,7 +141,6 @@ export function EnrollmentPage({ user, onLogout }: EnrollmentPageProps) {
         description: formData.description,
         type: formData.projectType,
         deviceType: formData.deviceType,
-        webFramework: formData.webFramework,
         giteaRepoUrl: repo.html_url,
         repoId: repo.id,
         userId: user.id,
@@ -370,8 +368,6 @@ services:
 
 ${data.description}
 
-## Framework
-${data.webFramework}
 
 ## Deployment Instructions
 
@@ -542,25 +538,6 @@ Upload your project documentation (PDF) using the project management system.
                     </div>
                   )}
 
-              {false && (                    <div className="space-y-2">
-                      <Label htmlFor="webFramework">Framework *</Label>
-                      <Select
-                        value={formData.webFramework}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, webFramework: value })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="react">React</SelectItem>
-                          <SelectItem value="nodejs">Node.js</SelectItem>
-                          <SelectItem value="python">Python (Flask/Django)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
                 </>
               )}
 
@@ -647,7 +624,7 @@ Upload your project documentation (PDF) using the project management system.
                       <p className="text-gray-900 dark:text-white capitalize">
                         {formData.projectType === 'device'
                           ? `Device (${formData.deviceType})`
-                          : `Web App (${formData.webFramework})`}
+                          : 'Web App'}
                       </p>
                     </div>
                   </div>
