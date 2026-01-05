@@ -480,71 +480,8 @@ const contents = await giteaAPI.getRepoContents(project.name);
               {/* Docker Deployment */}
               <TabsContent value="docker" className="space-y-6">
                 <div className="max-w-2xl mx-auto space-y-6">
-                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <div className="flex gap-3">
-                      <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5" />
-                      <div>
-                        <h4 className="text-gray-900 dark:text-white mb-1">
-                          Docker Configuration
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Configure your Docker deployment settings. The system will automatically
-                          generate docker-compose.yml and deploy your application.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="port">Application Port</Label>
-                      <Input
-                        id="port"
-                        type="number"
-                        value={dockerConfig.port}
-                        onChange={(e) =>
-                          setDockerConfig({ ...dockerConfig, port: e.target.value })
-                        }
-                        placeholder="3000"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="environment">Environment</Label>
-                      <Select
-                        value={dockerConfig.environment}
-                        onValueChange={(value) =>
-                          setDockerConfig({ ...dockerConfig, environment: value })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="development">Development</SelectItem>
-                          <SelectItem value="staging">Staging</SelectItem>
-                          <SelectItem value="production">Production</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="replicas">Replicas</Label>
-                      <Input
-                        id="replicas"
-                        type="number"
-                        min="1"
-                        value={dockerConfig.replicas}
-                        onChange={(e) =>
-                          setDockerConfig({ ...dockerConfig, replicas: e.target.value })
-                        }
-                        placeholder="1"
-                      />
-                    </div>
-                  </div>
-
-                  <Card className="bg-gray-50 dark:bg-gray-800">
-                    <CardHeader>
+                    <Card className="bg-gray-50 dark:bg-gray-800">
+<CardHeader>
                       <CardTitle className="text-sm">Generated Docker Compose</CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -565,24 +502,32 @@ services:
                     </CardContent>
                   </Card>
 
-                  <Button
-                    className="w-full gap-2"
-                    size="lg"
-                    onClick={handleDockerDeployment}
-                    disabled={deploying}
-                  >
-                    {deploying ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Deploying Docker Container...
-                      </>
-                    ) : (
-                      <>
-                        <Play className="w-4 h-4" />
-                        Deploy Docker Container
-                      </>
-                    )}
-                  </Button>
+                {/* Instructions for running Docker */}
+                <Card className="mt-4">
+                  <CardHeader>
+                    <h3 className="text-lg font-semibold text-blue-600 dark:text-blue-400">
+                      How to Run with Docker
+                    </h3>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      Follow these steps to run your project with Docker:
+                    </p>
+                    <ol className="list-decimal list-inside space-y-2 text-sm ml-2">
+                      <li>Copy the docker-compose.yml content above</li>
+                      <li>Save it as <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded text-xs">docker-compose.yml</code> in your project directory</li>
+                      <li>Open a terminal in your project directory</li>
+                      <li>Run: <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-xs font-mono">docker-compose up -d</code></li>
+                      <li>Access your application at <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded text-xs">http://localhost:3000</code></li>
+                    </ol>
+                    <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <p className="text-xs font-medium text-blue-800 dark:text-blue-200">
+                        💡 Note: Make sure Docker is installed and running on your machine before executing these commands.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 </div>
               </TabsContent>
             </CardContent>

@@ -140,7 +140,7 @@ export function EnrollmentPage({ user, onLogout }: EnrollmentPageProps) {
         name: formData.projectName,
         description: formData.description,
         type: formData.projectType,
-        deviceType: formData.deviceType,
+        deviceType: formData.projectType === 'web' ? 'web-app' : formData.deviceType,
         giteaRepoUrl: repo.html_url,
         repoId: repo.id,
         userId: user.id,
