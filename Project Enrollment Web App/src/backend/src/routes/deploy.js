@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/auth');
 const Project = require('../models/Project');
+const { deployToArduinoESP32 } = require('../services/deviceDeployment');
 
 // @route   POST /api/deploy/device
 // @desc    Deploy project to microcontroller device
@@ -23,26 +24,33 @@ router.post('/device', protect, async (req, res) => {
       return res.status(404).json({ message: 'Project not found' });
     }
 
-    // TODO: Implement actual deployment logic
-    // This would involve:
-    // 1. Fetching project code from Gitea repository
-    // 2. Compiling the code (for Arduino/ESP32)
-    // 3. Uploading to device via serial port using platformio or arduino-cli
-    
-    // Mock successful deployment
-    console.log(`Deploying project ${projectId} to ${comPort} (${deviceType})`);
-    
-    // Simulate deployment delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    res.json({
-      success: true,
-      message: `Successfully deployed project "${project.name}" to ${comPort}`,
-      projectId,
+    // Call the Arduino/ESP32 deployment service
+    const deploymentResult = await deployToArduinoESP32({
       comPort,
-      deviceType
+      deviceType,
+      project
     });
-  } catch (error) {
+    
+    // Return the deployment result with logs
+    if (deploymentResult.success) {
+      res.json({
+        success: true,
+        message: deploymentResult.message,
+        logs: deploymentResult.logs,
+        details: deploymentResult.details,
+        projectId,
+        comPort,
+        deviceType
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: deploymentResult.message,
+        logs: deploymentResult.logs,
+        error: deploymentResult.error
+      });
+    }
+      } catch (error) {
     console.error('Device deployment error:', error);
     res.status(500).json({ 
       success: false,

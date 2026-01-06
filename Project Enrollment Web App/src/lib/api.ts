@@ -183,7 +183,7 @@ const data = await response.json();
 // Serial Port APIs (for COM port scanning and serial monitor)
 export const serialAPI = {
   getPorts: async () => {
-    const response = await fetch(`${API_BASE_URL}/serial/ports`, {
+    const response = await fetch(`${API_BASE_URL}/com-ports`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) throw new Error('Failed to fetch COM ports');
