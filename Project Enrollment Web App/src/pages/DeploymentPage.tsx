@@ -132,17 +132,14 @@ const contents = await giteaAPI.getRepoContents(project.name);
 
   const loadComPorts = async () => {
     try {
-      const response = await serialAPI.getPorts();
-            console.log('=== FRONTEND COM PORTS DEBUG ===');
-      console.log('🔵 API response received:', response);
-      console.log('🔵 response.ports:', response.ports);
-      console.log('🔵 typeof response:', typeof response);
-      console.log('🔵 Is array?:', Array.isArray(response));
-      console.log('🔵 Is response.ports array?:', Array.isArray(response.ports));
-      setPorts(response.ports || []);
-      if (response.ports && response.ports.length > 0) {
-        setSelectedPort(response.ports[0]);
-      }
+          const response = await serialAPI.getPorts();
+          // Handle both response formats: array directly or {ports: array}
+    const portsArray = Array.isArray(response) ? response : (response.ports || []);
+    setPorts(portsArray);
+        console.log('✅ About to setPorts with:', portsArray);
+    console.log('✅ portsArray.length:', portsArray.length);
+    console.log('✅ portsArray[0]:', portsArray[0]);
+    if (portsArray && portsArray.length > 0) {      setSelectedPort(portsArray[0].path);      }
     } catch (error: any) {
       console.error('Failed to load COM ports:', error);
     }
@@ -352,9 +349,9 @@ const contents = await giteaAPI.getRepoContents(project.name);
                             </SelectItem>
                           ) : (
                             ports.map((port) => (
-                              <SelectItem key={port} value={port}>
-                                {port}
-                              </SelectItem>
+              <SelectItem key={port.path} value={port.path}>
+                {port.path}
+              </SelectItem>
                             ))
                           )}
                         </SelectContent>

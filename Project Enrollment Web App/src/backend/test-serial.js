@@ -1,16 +1,10 @@
-// Test script to check SerialPort detection
+// Test script to check SerialPort detection - JSON output version
 const { SerialPort } = require('serialport');
 
 SerialPort.list().then(ports => {
-  console.log('COM Ports detected:', ports.length);
-  ports.forEach(port => {
-    console.log('Port:', port.path);
-    console.log('  Manufacturer:', port.manufacturer);
-    console.log('  Serial Number:', port.serialNumber);
-    console.log('  Vendor ID:', port.vendorId);
-    console.log('  Product ID:', port.productId);
-    console.log('---');
-  });
+  // Output as JSON for easy parsing by the web server
+  console.log(JSON.stringify(ports));
 }).catch(err => {
-  console.error('Error listing ports:', err);
+  console.error(JSON.stringify({ error: err.message }));
+  process.exit(1);
 });
