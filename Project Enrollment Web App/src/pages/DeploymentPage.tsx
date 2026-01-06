@@ -133,6 +133,12 @@ const contents = await giteaAPI.getRepoContents(project.name);
   const loadComPorts = async () => {
     try {
       const response = await serialAPI.getPorts();
+            console.log('=== FRONTEND COM PORTS DEBUG ===');
+      console.log('🔵 API response received:', response);
+      console.log('🔵 response.ports:', response.ports);
+      console.log('🔵 typeof response:', typeof response);
+      console.log('🔵 Is array?:', Array.isArray(response));
+      console.log('🔵 Is response.ports array?:', Array.isArray(response.ports));
       setPorts(response.ports || []);
       if (response.ports && response.ports.length > 0) {
         setSelectedPort(response.ports[0]);
