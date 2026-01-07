@@ -24,6 +24,11 @@ const projectSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+    giteaRepoId: {
+          type: Number,
+              unique: true,  // Each Gitea repo ID should be unique
+                  sparse: true   // Allow null values
+                    },
   giteaRepoUrl: {
     type: String,
     required: true,

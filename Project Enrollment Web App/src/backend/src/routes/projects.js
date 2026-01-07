@@ -229,12 +229,15 @@ router.post('/', protect, async (req, res) => {
       
       console.log(`✅ Gitea repository created: ${giteaRepoUrl}`);
     } catch (giteaError) {
+      
+      
       console.error('Gitea repository creation failed:', giteaError.message);
     // Check if repository already exists
     if (giteaError.message?.includes('already exists')) {
       try {
         // Fetch the existing repository
                   const existingRepo = await giteaService.getRepository(giteaService.GITEA_OWNER, giteaRepoName);giteaRepoUrl = existingRepo.html_url;giteaService.GconsoleITEA_OWNER.warn(`Repository ${giteaRepoName} already exists, using existing repository`);
+                          giteaRepo = existingRepo;  // Assign to giteaRepo for later use
       } catch (fetchErr) {
           console.warn('Could not fetch existing repository:', fetchErr.message);
       }
@@ -243,6 +246,7 @@ router.post('/', protect, async (req, res) => {
     }
 
     // Create project in MongoDB
+        console.log('DEBUG - giteaRepo:', giteaRepo);
     project= await Project.create({
       name,
       description,
@@ -250,6 +254,7 @@ router.post('/', protect, async (req, res) => {
       createdBy: req.user._id,
       createdByName: req.user.name,
       giteaRepoUrl,
+            giteaRepoId: giteaRepo?.id,
       giteaRepoName,
       ports: ports || [],
       dockerManifest: dockerManifest || '',

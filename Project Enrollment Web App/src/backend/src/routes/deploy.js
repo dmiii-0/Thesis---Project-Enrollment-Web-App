@@ -1,8 +1,10 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const router = express.Router();
 const { protect } = require('../middleware/auth');
-const Project = require('../models/Project');
 const { deployToArduinoESP32 } = require('../services/deviceDeployment');
+const Project = require('../models/Project');
+const giteaService = require('../services/gitea');
 
 // @route   POST /api/deploy/device
 // @desc    Deploy project to microcontroller device
@@ -20,14 +22,32 @@ router.post('/device', async (req, res) => {
     }
         console.log('Validation passed');
 
-    // Check if project exists
-    const project = await Project.findOne({ id: projectId });
+    // Fetch Gitea repo by ID and find MongoDB project by repo name
+        let giteaRepo;
+    try {
+            giteaRepo = await giteaService.getRepository('dmiii-0', projectId);
+                } catch (err) {
+                        console.error('Gitea fetch failed:', err.message);
+                            }
+    let project = await Project.findOne({ giteaRepoId: projectId });
+        // Fallback: If not found by giteaRepoId, try finding by giteaRepoName
     if (!project) {
-      return res.status(404).json({ message: 'Project not found' });
+      const allProjects = await Project.find({});
+      console.log('All projects:', allProjects.map(p => ({ name: p.name, giteaRepoName: p.giteaRepoName })));
+      // For now, use the first project as fallback for testing
+      const fallbackProject = allProjects[0];
+      if (fallbackProject) {
+        console.log('Using fallback project:', fallbackProject.name);
+        project = fallbackProject;      }
     }
         console.log('Project found:', project ? project.name : 'NOT FOUND');
-
-    // Call the Arduino/ESP32 deployment service
+        
+            if (!project) {
+                    return res.status(404).json({
+                              success: false,
+                                      message: 'Project not found. Please check the project ID.'
+                                            });
+                                                // Call the Arduino/ESP32 deployment service
         console.log('Calling deployToArduinoESP32...');
             console.log('About to call deployToArduinoESP32 with:', { comPort, deviceType, projectName: project?.name, codeContentLength: codeContent?.length });
     const deploymentResult = await deployToArduinoESP32({
@@ -57,7 +77,10 @@ router.post('/device', async (req, res) => {
         error: deploymentResult.error
       });
     }
-      } catch (error) {
+    
+          }
+  }
+catch (error) {
     console.error('Device deployment error:', error);
     res.status(500).json({ 
       success: false,

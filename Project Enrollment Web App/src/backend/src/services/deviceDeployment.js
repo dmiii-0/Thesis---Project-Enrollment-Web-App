@@ -29,7 +29,7 @@ async function deployToArduinoESP32({ comPort, deviceType, project, codeContent 
     
     deploymentLog.push(`✓ COM port ${comPort} found`);
     deploymentLog.push(`  Device info: ${portExists.manufacturer || 'Unknown'} - ${portExists.serialNumber || 'N/A'}`);
-    
+    //     
     // Step 2: Validate code content
     if (!codeContent || codeContent.trim().length === 0) {
       throw new Error('No code content provided');
