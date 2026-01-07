@@ -29,8 +29,7 @@ import {
     File,
 } from 'lucide-react';
 import { giteaAPI, serialAPI, dockerAPI } from '../lib/api';
-import { toast } from 'sonner@2.0.3';
-
+import { toast } from 'sonner';
 interface DeploymentPageProps {
   user: any;
   onLogout: () => void;
@@ -162,22 +161,19 @@ const contents = await giteaAPI.getRepoContents(project.name);
 
         // Fetch the selected file content
     addSerialOutput('⏳ Loading code file...');
-    const fileResponse = await fetch(`/api/projects/${id}/file-content/${selectedCodeFile}`, {
-      credentials: 'include',
-    });
-    
-    if (!fileResponse.ok) {
-      throw new Error('Failed to load code file');
-    }
-    
-    const fileData = await fileResponse.json();
-    const codeContent = fileData.content || '';
-    
-    if (!codeContent.trim()) {
+    // Fetch file content directly from Gitea
+    // Fetch file content directly from Gitea using raw file URL
+    const giteaRawUrl = `https://gitea.com/dmiii-0/${project.name}/raw/branch/main/${selectedCodeFile}`;
+    const fileResponse = await fetch(giteaRawUrl);
+    const codeContent = await fileResponse.text();
+
+    if (!codeContent || codeContent.trim().length === 0) {
       toast.error('Code file is empty');
       setDeploying(false);
       return;
     }
+
+    // Call backend API to deploy
     try {
       await serialAPI.deploy(id || '', selectedPort, codeContent);
       addSerialOutput('✅ Code compiled successfully');

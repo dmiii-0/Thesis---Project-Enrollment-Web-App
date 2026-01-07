@@ -468,5 +468,47 @@ router.get('/:id/files/content', protect, async (req, res) => {
     });
   }
 });
+// @route   GET /api/projects/:id/file-content/:filename
+// @desc    Get file content from repository (alternative route)
+// @access  Private
+router.get('/:id/file-content/:filename', protect, async (req, res) => {
+  try {
+        console.log('=== FILE-CONTENT ROUTE CALLED ===');
+    console.log('Project ID:', req.params.id);
+    console.log('Filename:', req.params.filename);
+    // Try to find project by _id (MongoDB ObjectId) or by a numeric identifier
+    let project;
+    try {
+      project = await Project.findById(req.params.id);
+    } catch (err) {
+      // If findById fails (invalid ObjectId format), try finding by other fields
+      project = await Project.findOne({ $or: [{ enrollmentNumber: req.params.id }, { projectNumber: req.params.id }] });
+    }    
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    const { filename } = req.params;
+    
+    if (!filename) {
+      return res.status(400).json({ message: 'Filename is required' });
+    }
+
+    const fileContent = await giteaService.getFileContent(
+      giteaService.GITEA_OWNER,
+      project.giteaRepoName,
+      filename
+    );
+
+    res.json({ content: fileContent });
+  } catch (error) {
+    console.error('Get file content error:', error);
+    res.status(500).json({
+      message: 'Server error while fetching file content',
+      error: error.message
+    });
+  }
+});
+
 
 module.exports = router;

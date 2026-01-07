@@ -9,7 +9,7 @@ const { deployToArduinoESP32 } = require('../services/deviceDeployment');
 // @access  Private
 router.post('/device', protect, async (req, res) => {
   try {
-    const { projectId, comPort, deviceType } = req.body;
+    const { projectId, comPort, deviceType, codeContent } = req.body;
 
     // Validation
     if (!projectId || !comPort || !deviceType) {
@@ -28,7 +28,8 @@ router.post('/device', protect, async (req, res) => {
     const deploymentResult = await deployToArduinoESP32({
       comPort,
       deviceType,
-      project
+      project,
+      codeContent
     });
     
     // Return the deployment result with logs
