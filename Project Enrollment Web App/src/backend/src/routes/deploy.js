@@ -14,12 +14,11 @@ router.post('/device', async (req, res) => {
             console.log('Request body:', { projectId, comPort, deviceType, codeContentLength: codeContent?.length });
 
     // Validation
-    if (!projectId || !comPort || !deviceType) {
+    if (!projectId || !comPort || !deviceType || !codeContent) {
       return res.status(400).json({ 
-        message: 'Please provide projectId, comPort, and deviceType' 
-      });
-          console.log('Validation passed');
+        message: 'Please provide projectId, comPort, deviceType, and codeContent'      });
     }
+        console.log('Validation passed');
 
     // Check if project exists
     const project = await Project.findOne({ id: projectId });
@@ -30,6 +29,7 @@ router.post('/device', async (req, res) => {
 
     // Call the Arduino/ESP32 deployment service
         console.log('Calling deployToArduinoESP32...');
+            console.log('About to call deployToArduinoESP32 with:', { comPort, deviceType, projectName: project?.name, codeContentLength: codeContent?.length });
     const deploymentResult = await deployToArduinoESP32({
       comPort,
       deviceType,
@@ -37,6 +37,7 @@ router.post('/device', async (req, res) => {
       codeContent
     });
     
+        console.log('deployToArduinoESP32 returned:', deploymentResult);
     // Return the deployment result with logs
     if (deploymentResult.success) {
       res.json({
