@@ -40,9 +40,12 @@ router.post('/device', async (req, res) => {
         console.log('Using fallback project:', fallbackProject.name);
         project = fallbackProject;      }
     }
+    
         console.log('Project found:', project ? project.name : 'NOT FOUND');
-        
+            console.log('After project found, checking if project exists:', !!project, project?.name);
+    console.log('BEFORE if (!project) check. Project value:', project, 'Is falsy?:', !project);        
             if (!project) {
+              
                     return res.status(404).json({
                               success: false,
                                       message: 'Project not found. Please check the project ID.'
