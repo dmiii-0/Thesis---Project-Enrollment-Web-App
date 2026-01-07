@@ -11,7 +11,7 @@ const giteaService = require('../services/gitea');
 // @access  Private
 router.post('/device', async (req, res) => {
   try {
-    const { projectId, comPort, deviceType, codeContent } = req.body;
+    let { projectId, comPort, deviceType, codeContent } = req.body;
         console.log('=== DEVICE DEPLOYMENT DEBUG ===');
             console.log('Request body:', { projectId, comPort, deviceType, codeContentLength: codeContent?.length });
 
@@ -42,28 +42,45 @@ router.post('/device', async (req, res) => {
     }
 
         // Fetch code content from Gitea repository
+        // Only fetch from Gitea if no code was uploaded
+console.log('codeContent check:', codeContent ? `Has content (${codeContent.length} bytes)` : 'Empty');
+console.log('Project object:', project ? project.name : 'NULL');
+console.log('About to check if project exists...');
+if (!codeContent || codeContent.trim() === '') {
+  console.log('No code content provided, fetching from Gitea...');
+
     console.log('Fetching code from Gitea:', project.giteaRepoName);
-    codeContent = '';
-    try {
-      // Assuming the main code file is HelloWorld.ino or similar
-      const fileData = await giteaService.getFileContent('dmili-0', project.giteaRepoName, 'HelloWorld.ino');
-      codeContent = fileData.decodedContent;
-      console.log('Successfully fetched code from Gitea, length:', codeContent.length);
-    } catch (error) {
-      console.error('Error fetching code from Gitea:', error.message);
-      return res.status(500).json({
-        success: false,
-        message: 'Failed to fetch code from Gitea repository'
-      });
+    if (!codeContent || codeContent.trim() === '') {
+      try {
+        // Assuming the main code file is HelloWorld.ino or similar
+        const fileData = await giteaService.getFileContent('dmili-0', project.giteaRepoName, 'HelloWorld.ino');
+        codeContent = fileData.decodedContent;
+        console.log('Successfully fetched code from Gitea, length:', codeContent.length);
+      } catch (error) {
+        console.error('Error fetching code from Gitea:', error.message);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to fetch code from Gitea repository'
+        });
+        }  
+      }
     }
-    
-            if (!project) {
-              
+  console.log('Project check result:', !project ? 'Project is NULL' : 'Project exists');
+if (!project) {
+  console.log('ERROR: Project not found! Returning 404...');
                     return res.status(404).json({
                               success: false,
                                       message: 'Project not found. Please check the project ID.'
                                             });
+                                          }
+                                                 
+        console.log('✅ Passed project check, about to deploy...');
+        console.log('DEBUG: About to call deployToArduinoESP32 function');
+        console.log('Passed project check, about to deploy...');
+        console.log('Deployment parameters:', { comPort, deviceType, projectName: project?.name });
+
                                                 // Call the Arduino/ESP32 deployment service
+         console.log('DEBUG: About to call deployToArduinoESP32 function');
         console.log('Calling deployToArduinoESP32...');
             console.log('About to call deployToArduinoESP32 with:', { comPort, deviceType, projectName: project?.name, codeContentLength: codeContent?.length });
     const deploymentResult = await deployToArduinoESP32({
@@ -95,7 +112,6 @@ router.post('/device', async (req, res) => {
     }
     
           }
-  }
 catch (error) {
     console.error('Device deployment error:', error);
     res.status(500).json({ 
