@@ -7,15 +7,18 @@ const { deployToArduinoESP32 } = require('../services/deviceDeployment');
 // @route   POST /api/deploy/device
 // @desc    Deploy project to microcontroller device
 // @access  Private
-router.post('/device', protect, async (req, res) => {
+router.post('/device', async (req, res) => {
   try {
     const { projectId, comPort, deviceType, codeContent } = req.body;
+        console.log('=== DEVICE DEPLOYMENT DEBUG ===');
+            console.log('Request body:', { projectId, comPort, deviceType, codeContentLength: codeContent?.length });
 
     // Validation
     if (!projectId || !comPort || !deviceType) {
       return res.status(400).json({ 
         message: 'Please provide projectId, comPort, and deviceType' 
       });
+          console.log('Validation passed');
     }
 
     // Check if project exists
@@ -23,8 +26,10 @@ router.post('/device', protect, async (req, res) => {
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
     }
+        console.log('Project found:', project ? project.name : 'NOT FOUND');
 
     // Call the Arduino/ESP32 deployment service
+        console.log('Calling deployToArduinoESP32...');
     const deploymentResult = await deployToArduinoESP32({
       comPort,
       deviceType,
