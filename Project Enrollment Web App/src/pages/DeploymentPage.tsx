@@ -163,17 +163,9 @@ const contents = await giteaAPI.getRepoContents(project.name);
     addSerialOutput('⏳ Loading code file...');
     // Fetch file content directly from Gitea
     // Fetch file content directly from Gitea using raw file URL
-    const giteaRawUrl = `https://gitea.com/dmiii-0/${project.name}/raw/branch/main/${selectedCodeFile}`;
-    const fileResponse = await fetch(giteaRawUrl);
-    const codeContent = await fileResponse.text();
-
-    if (!codeContent || codeContent.trim().length === 0) {
-      toast.error('Code file is empty');
-      setDeploying(false);
-      return;
-    }
-
-    // Call backend API to deploy
+    // Fetch file content using Gitea API through backend
+    const fileContentResponse = await giteaAPI.getRepoContents(project.name, selectedCodeFile);
+    const codeContent = atob(fileContentResponse.content); // Gitea returns base64 encoded content    }
     try {
       await serialAPI.deploy(id || '', selectedPort, codeContent);
       addSerialOutput('✅ Code compiled successfully');

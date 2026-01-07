@@ -19,7 +19,7 @@ router.post('/device', protect, async (req, res) => {
     }
 
     // Check if project exists
-    const project = await Project.findById(projectId);
+    const project = await Project.findOne({ id: projectId });
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
     }

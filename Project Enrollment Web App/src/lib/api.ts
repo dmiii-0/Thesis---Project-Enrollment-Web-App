@@ -193,6 +193,7 @@ export const serialAPI = {
   deploy: async (projectId: string, port: string, code: string) => {
           const response = await fetch(`${API_BASE_URL}/deploy/device`, {
       headers: getAuthHeaders(),
+          method: 'POST',
       body: JSON.stringify({ projectId, comPort: port, deviceType: 'Arduino', codeContent: code }),    });
     if (!response.ok) throw new Error('Failed to deploy to device');
     return response.json();
