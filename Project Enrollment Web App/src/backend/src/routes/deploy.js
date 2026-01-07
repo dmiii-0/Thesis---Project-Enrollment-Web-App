@@ -40,10 +40,23 @@ router.post('/device', async (req, res) => {
         console.log('Using fallback project:', fallbackProject.name);
         project = fallbackProject;      }
     }
+
+        // Fetch code content from Gitea repository
+    console.log('Fetching code from Gitea:', project.giteaRepoName);
+    codeContent = '';
+    try {
+      // Assuming the main code file is HelloWorld.ino or similar
+      const fileData = await giteaService.getFileContent('dmili-0', project.giteaRepoName, 'HelloWorld.ino');
+      codeContent = fileData.decodedContent;
+      console.log('Successfully fetched code from Gitea, length:', codeContent.length);
+    } catch (error) {
+      console.error('Error fetching code from Gitea:', error.message);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to fetch code from Gitea repository'
+      });
+    }
     
-        console.log('Project found:', project ? project.name : 'NOT FOUND');
-            console.log('After project found, checking if project exists:', !!project, project?.name);
-    console.log('BEFORE if (!project) check. Project value:', project, 'Is falsy?:', !project);        
             if (!project) {
               
                     return res.status(404).json({
