@@ -54,6 +54,7 @@ export function DeploymentPage({ user, onLogout }: DeploymentPageProps) {
   const [ports, setPorts] = useState<string[]>([]);
   const [selectedPort, setSelectedPort] = useState('');
   const [deviceCode, setDeviceCode] = useState('');
+    const [selectedDeviceType, setSelectedDeviceType] = useState('Arduino');
     const [codeFiles, setCodeFiles] = useState<any[]>([]);
   const [selectedCodeFile, setSelectedCodeFile] = useState<string>('');
   const [serialOutput, setSerialOutput] = useState<string[]>([]);
@@ -167,8 +168,7 @@ const contents = await giteaAPI.getRepoContents(project.name);
     const fileContentResponse = await giteaAPI.getRepoContents(project.name, selectedCodeFile);
     const codeContent = atob(fileContentResponse.content); // Gitea returns base64 encoded content    }
     try {
-      await serialAPI.deploy(id || '', selectedPort, codeContent);
-      addSerialOutput('✅ Code compiled successfully');
+      await serialAPI.deploy(id || '', selectedPort, codeContent, selectedDeviceType);      addSerialOutput('✅ Code compiled successfully');
       addSerialOutput('📤 Uploading to device...');
       
       // Simulate upload progress
