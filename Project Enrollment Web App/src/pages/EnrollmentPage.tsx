@@ -31,7 +31,7 @@ export function EnrollmentPage({ user, onLogout }: EnrollmentPageProps) {
     projectName: '',
     description: '',
     projectType: 'device',
-    deviceType: 'arduino',
+    deviceType: 'Arduino',
     visibility: 'public',
     autoInit: true,
   });
@@ -160,7 +160,7 @@ export function EnrollmentPage({ user, onLogout }: EnrollmentPageProps) {
 
   const generateDeviceCode = (deviceType: string) => {
     switch (deviceType) {
-      case 'arduino':
+      case 'Arduino':
         return `// Arduino Starter Code
 // University of Batangas Lipa Campus
 
@@ -186,7 +186,7 @@ void loop() {
   delay(1000);
 }`;
 
-      case 'esp32':
+      case 'ESP32':
         return `// ESP32 Starter Code
 // University of Batangas Lipa Campus
 
@@ -253,8 +253,8 @@ except KeyboardInterrupt:
 
   const getDeviceFileName = (deviceType: string) => {
     switch (deviceType) {
-      case 'arduino':
-      case 'esp32':
+      case 'Arduino':
+      case 'ESP32':
         return 'main.ino';
       case 'raspberry-pi':
         return 'main.py';
@@ -530,8 +530,8 @@ Upload your project documentation (PDF) using the project management system.
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="arduino">Arduino</SelectItem>
-                          <SelectItem value="esp32">ESP32</SelectItem>
+                          <SelectItem value="Arduino">Arduino</SelectItem>
+                          <SelectItem value="ESP32">ESP32</SelectItem>
                           <SelectItem value="raspberry-pi">Raspberry Pi</SelectItem>
                         </SelectContent>
                       </Select>

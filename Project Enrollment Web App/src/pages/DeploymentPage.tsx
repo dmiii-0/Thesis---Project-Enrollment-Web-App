@@ -53,8 +53,8 @@ export function DeploymentPage({ user, onLogout }: DeploymentPageProps) {
   // Device deployment state
   const [ports, setPorts] = useState<string[]>([]);
   const [selectedPort, setSelectedPort] = useState('');
-  const [deviceCode, setDeviceCode] = useState('');
     const [selectedDeviceType, setSelectedDeviceType] = useState('Arduino');
+  const [deviceCode, setDeviceCode] = useState('');
     const [codeFiles, setCodeFiles] = useState<any[]>([]);
   const [selectedCodeFile, setSelectedCodeFile] = useState<string>('');
   const [serialOutput, setSerialOutput] = useState<string[]>([]);
@@ -311,6 +311,23 @@ const contents = await giteaAPI.getRepoContents(project.name);
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Left Column - Configuration */}
                   <div className="space-y-6">
+                                    {/* Device Type selection */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label>Device Type</Label>
+                  </div>
+                  <Select value={selectedDeviceType} onValueChange={setSelectedDeviceType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select device type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Arduino">Arduino</SelectItem>
+                      <SelectItem value="ESP32">ESP32</SelectItem>
+                      <SelectItem value="Raspberry Pi">Raspberry Pi</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                     {/* COM Port Selection */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
@@ -346,6 +363,7 @@ const contents = await giteaAPI.getRepoContents(project.name);
                       </Select>
                     </div>
 
+                                  
                     {/* Code Editor */}
                     <div className="space-y-3">
                                     <Label>Select Code File to Upload</Label>

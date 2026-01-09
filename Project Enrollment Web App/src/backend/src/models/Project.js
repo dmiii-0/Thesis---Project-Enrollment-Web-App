@@ -12,8 +12,8 @@ const projectSchema = new mongoose.Schema({
   },
   deviceType: {
     type: String,
-    enum: ['arduino', 'esp32', 'raspberry-pi', 'web-app'],
-    required: true,
+    enum: ['Arduino', 'ESP32', 'Raspberry Pi', 'web-app'],    required: true,
+  
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
