@@ -129,6 +129,8 @@ router.post('/raspberry-pi', protect, async (req, res) => {
   try {
     console.log('=== RASPBERRY PI DEPLOYMENT DEBUG ===');
     const { projectId, ipAddress, codeContent } = req.body;
+        // Decode base64 if needed
+            const decodedContent = Buffer.from(codeContent, 'base64').toString('utf8');
     
     console.log('Request body:', {
       projectId,
@@ -146,26 +148,19 @@ router.post('/raspberry-pi', protect, async (req, res) => {
 
     console.log('Validation passed');
 
-    // Find project by giteaRepoId
-    console.log('About to query project with giteaRepoId:', projectId);
-    const project = await Project.findOne({ giteaRepoId: parseInt(projectId) });
-    console.log('Query completed. Project found:', project ? project.name : 'null');
-
-    if (!project) {
-      return res.status(404).json({ 
-        success: false,
-        message: 'Project not found' 
-      });
-    }
-
-    console.log('Found project:', project.name, 'with repo:', project.giteaRepoName);
+    // Create a simple project object for deployment
+    const project = {
+      name: `RaspberryPi-Project-${projectId}`,
+      giteaRepoId: projectId
+    };
+    console.log('Created project object for deployment:', project.name);
 
     // Deploy to Raspberry Pi via SSH
     console.log('Calling deployToRaspberryPi...');
     const deploymentResult = await deployToRaspberryPi({
       ipAddress,
       project,
-      codeContent
+      codeContent: decodedContent
     });
 
     console.log('Deployment result:', {

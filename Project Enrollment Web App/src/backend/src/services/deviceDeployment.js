@@ -1,6 +1,7 @@
 // const { Client } = require('ssh2');
 const { SerialPort } = require('serialport');
 const fs = require('fs');const fsSync = require('fs');
+const fsPromises = require('fs').promises;
 const path = require('path');
 const { exec, spawn } = require('child_process');
 const util = require('util');
@@ -218,18 +219,17 @@ async function deployToRaspberryPi({ ipAddress, project, codeContent }) {
   try {
     addLog('info', `Starting deployment to Raspberry Pi at ${ipAddress}`);
     
-    // Connect via SSH using key authentication
+    // Connect via SSH using password authentication    
     await ssh.connect({
       host: ipAddress,
       username: process.env.RASPBERRY_PI_DEFAULT_USER || 'thesis2026',
-      privateKey: process.env.RASPBERRY_PI_SSH_KEY_PATH,
-    });
+      password: process.env.RASPBERRY_PI_PASSWORD || 'ubian2024',    });
     
     addLog('success', 'SSH connection established successfully');
+        const sshUsername = process.env.RASPBERRY_PI_DEFAULT_USER || 'thesis2026';
 
     // Create project directory on Pi
-    const projectDir = `/home/${process.env.RASPBERRY_PI_DEFAULT_USER}/projects/${project.giteaRepoName}`;
-    await ssh.execCommand(`mkdir -p ${projectDir}`);
+    const projectDir = `/home/${sshUsername}/projects/${project.name}`;    await ssh.execCommand(`mkdir -p ${projectDir}`);
     
     addLog('info', `Created project directory: ${projectDir}`);
 
@@ -244,8 +244,8 @@ async function deployToRaspberryPi({ ipAddress, project, codeContent }) {
     }
 
     // Write code to temporary file on Server PC
-    const tempFile = path.join(os.tmpdir(), `${project.giteaRepoName}_${Date.now()}.tmp`);
-    await fs.writeFile(tempFile, codeContent, 'utf8');
+    const tempFile = path.join(os.tmpdir(), `${project.name}_${Date.now()}.tmp`);
+    await fsPromises.writeFile(tempFile, codeContent, { encoding: 'utf8' });
     
     addLog('info', 'Code written to temporary file');
 
@@ -295,6 +295,14 @@ async function deployToRaspberryPi({ ipAddress, project, codeContent }) {
       addLog('error', `Execution error: ${execResult.stderr}`);
     } else {
       addLog('success', 'Code executed successfully');
+
+            // Open file in Thonny on Raspberry Pi
+                  const thonnyResult = await ssh.execCommand(`DISPLAY=:0 thonny ${remotePath} &`);
+                        if (thonnyResult.code === 0) {
+                                  addLog('success', 'File opened in Thonny on Raspberry Pi');
+                                        } else {
+                                                  addLog('warning', 'Could not open Thonny automatically');
+                                                        }
     }
 
     // Capture output

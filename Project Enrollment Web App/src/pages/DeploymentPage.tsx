@@ -28,8 +28,7 @@ import {
   Usb,
     File,
 } from 'lucide-react';
-import { giteaAPI, serialAPI, dockerAPI } from '../lib/api';
-import { toast } from 'sonner';
+import { giteaAPI, serialAPI, dockerAPI, raspberryPiAPI } from '../lib/api';import { toast } from 'sonner';
 interface DeploymentPageProps {
   user: any;
   onLogout: () => void;
@@ -51,7 +50,7 @@ export function DeploymentPage({ user, onLogout }: DeploymentPageProps) {
   const [deploying, setDeploying] = useState(false);
   
   // Device deployment state
-  const [ports, setPorts] = useState<string[]>([]);
+    const [ports, setPorts] = useState<{ path: string }[]>([]);
   const [selectedPort, setSelectedPort] = useState('');
     const [selectedDeviceType, setSelectedDeviceType] = useState('Arduino');
   const [deviceCode, setDeviceCode] = useState('');
@@ -59,6 +58,11 @@ export function DeploymentPage({ user, onLogout }: DeploymentPageProps) {
   const [selectedCodeFile, setSelectedCodeFile] = useState<string>('');
   const [serialOutput, setSerialOutput] = useState<string[]>([]);
   const [serialConnected, setSerialConnected] = useState(false);
+
+    // Raspberry Pi SSH deployment state
+  const [sshIpAddress, setSshIpAddress] = useState('192.168.68.115');
+  const [sshUsername, setSshUsername] = useState('thesis2026');
+  const [sshPassword, setSshPassword] = useState('ubian2024');
   
   // Docker deployment state
   const [dockerConfig, setDockerConfig] = useState({
@@ -146,7 +150,7 @@ const contents = await giteaAPI.getRepoContents(project.name);
   };
 
   const handleDeviceDeployment = async () => {
-    if (!selectedPort) {
+        if (selectedDeviceType !== 'Raspberry Pi' && !selectedPort) {
       toast.error('Please select a COM port');
       return;
     }
@@ -157,7 +161,9 @@ const contents = await giteaAPI.getRepoContents(project.name);
 
     setDeploying(true);
     addSerialOutput('🚀 Starting deployment...');
-    addSerialOutput(`📡 Selected port: ${selectedPort}`);
+        if (selectedDeviceType !== 'Raspberry Pi') {
+      addSerialOutput(`📌 Selected port: ${selectedPort}`);
+    }
 
 
         // Fetch the selected file content
@@ -168,9 +174,39 @@ const contents = await giteaAPI.getRepoContents(project.name);
     const fileContentResponse = await giteaAPI.getRepoContents(project.name, selectedCodeFile);
     const codeContent = atob(fileContentResponse.content); // Gitea returns base64 encoded content    }
     try {
-      await serialAPI.deploy(id || '', selectedPort, codeContent, selectedDeviceType);      addSerialOutput('✅ Code compiled successfully');
-      addSerialOutput('📤 Uploading to device...');
-      
+      if (selectedDeviceType === 'Raspberry Pi') {
+        // SSH deployment for Raspberry Pi
+        const result = await raspberryPiAPI.deploy(id || '', sshIpAddress, codeContent);
+        
+        // Display deployment logs
+        if (result.logs && Array.isArray(result.logs)) {
+          result.logs.forEach((log: any) => {
+            const icon = log.type === 'error' ? '❌' : log.type === 'success' ? '✅' : 'ℹ️';
+            addSerialOutput(`${icon} ${log.message}`);
+          });
+        }
+        
+        // Display the Python output from Raspberry Pi
+        if (result.output) {
+          addSerialOutput('\n📟 === RASPBERRY PI OUTPUT ===');
+          addSerialOutput(result.output);
+          addSerialOutput('📟 === END OF OUTPUT ===\n');
+        }
+        
+        // Display any errors
+        if (result.error) {
+          addSerialOutput(`❌ Error: ${result.error}`);
+        }
+        
+        if (result.success) {
+          toast.success('Raspberry Pi deployment successful!');
+        } else {
+          toast.error(result.message || 'Deployment failed');
+        }      } else {
+        // Serial deployment for Arduino/ESP32
+        await serialAPI.deploy(id || '', selectedPort, codeContent, selectedDeviceType);
+        addSerialOutput('📤 Uploading to device...');
+      }
       // Simulate upload progress
       await new Promise(resolve => setTimeout(resolve, 2000));
       
@@ -327,7 +363,9 @@ const contents = await giteaAPI.getRepoContents(project.name);
                     </SelectContent>
                   </Select>
                 </div>
-
+                              {/* Serial Communication - Arduino & ESP32 Only */}
+              {(selectedDeviceType === 'Arduino' || selectedDeviceType === 'ESP32') && (
+                                <div>
                     {/* COM Port Selection */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
@@ -342,6 +380,8 @@ const contents = await giteaAPI.getRepoContents(project.name);
                           Refresh
                         </Button>
                       </div>
+
+                                  {/* SSH Communication - Raspberry Pi Only */}
                       <Select value={selectedPort} onValueChange={setSelectedPort}>
                         <SelectTrigger>
                           <Usb className="w-4 h-4 mr-2" />
@@ -362,6 +402,56 @@ const contents = await giteaAPI.getRepoContents(project.name);
                         </SelectContent>
                       </Select>
                     </div>
+                                    </div>
+                                  )}
+
+                                                {/* SSH Communication - Raspberry Pi Only */}
+              {selectedDeviceType === 'Raspberry Pi' && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label>SSH Connection</Label>
+                  </div>
+                  
+                  {/* IP Address Input */}
+                  <div>
+                    <Label htmlFor="sshIp">Raspberry Pi IP Address</Label>
+                    <Input
+                      id="sshIp"
+                      type="text"
+                      value={sshIpAddress}
+                      onChange={(e) => setSshIpAddress(e.target.value)}
+                      placeholder="192.168.68.115"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  {/* Username Input */}
+                  <div>
+                    <Label htmlFor="sshUser">SSH Username</Label>
+                    <Input
+                      id="sshUser"
+                      type="text"
+                      value={sshUsername}
+                      onChange={(e) => setSshUsername(e.target.value)}
+                      placeholder="thesis2026"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  {/* Password Input */}
+                  <div>
+                    <Label htmlFor="sshPass">SSH Password</Label>
+                    <Input
+                      id="sshPass"
+                      type="password"
+                      value={sshPassword}
+                      onChange={(e) => setSshPassword(e.target.value)}
+                      placeholder="Enter password"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              )}
 
                                   
                     {/* Code Editor */}
@@ -409,7 +499,7 @@ const contents = await giteaAPI.getRepoContents(project.name);
                     <Button
                       className="w-full gap-2"
                       onClick={handleDeviceDeployment}
-                      disabled={deploying || !selectedPort}
+                                disabled={deploying || (selectedDeviceType !== 'Raspberry Pi' && !selectedPort)}
                     >
                       {deploying ? (
                         <>
