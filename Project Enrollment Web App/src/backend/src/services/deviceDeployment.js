@@ -5,6 +5,9 @@ const path = require('path');
 const { exec, spawn } = require('child_process');
 const util = require('util');
 const execPromise = util.promisify(exec);
+// Additional imports for Raspberry Pi SSH deployment
+const { NodeSSH } = require('node-ssh');
+const os = require('os');
 
 // Wrapper for execPromise that ensures shell is used (important for Windows PATH)
 const execWithShell = async (command, options = {}) => {
@@ -184,5 +187,152 @@ function getBoardFQBN(deviceType) {
   }
 }
 
-module.exports = { deployToArduinoESP32 };
 
+/**
+ * ================================================================
+ * SSH COMMUNICATION - RASPBERRY PI DEPLOYMENT
+ * ================================================================
+ */
+
+/**
+ * Deploy to Raspberry Pi via SSH
+ * Transfers code via SSH and executes it on the Raspberry Pi
+ * @param {Object} options - Deployment options
+ * @param {string} options.ipAddress - Raspberry Pi IP address
+ * @param {Object} options.project - Project object from database
+ * @param {string} options.codeContent - Code to deploy
+ */
+async function deployToRaspberryPi({ ipAddress, project, codeContent }) {
+  const ssh = new NodeSSH();
+  const deploymentLog = [];
+  
+  function addLog(type, message) {
+    deploymentLog.push({ 
+      type, 
+      message, 
+      timestamp: new Date().toISOString() 
+    });
+    console.log(`[${type.toUpperCase()}] ${message}`);
+  }
+
+  try {
+    addLog('info', `Starting deployment to Raspberry Pi at ${ipAddress}`);
+    
+    // Connect via SSH using key authentication
+    await ssh.connect({
+      host: ipAddress,
+      username: process.env.RASPBERRY_PI_DEFAULT_USER || 'thesis2026',
+      privateKey: process.env.RASPBERRY_PI_SSH_KEY_PATH,
+    });
+    
+    addLog('success', 'SSH connection established successfully');
+
+    // Create project directory on Pi
+    const projectDir = `/home/${process.env.RASPBERRY_PI_DEFAULT_USER}/projects/${project.giteaRepoName}`;
+    await ssh.execCommand(`mkdir -p ${projectDir}`);
+    
+    addLog('info', `Created project directory: ${projectDir}`);
+
+    // Determine file extension based on project type
+    let fileName = 'main.py'; // Default to Python
+    let executeCommand = 'python3 main.py';
+    
+    // Check if it's a Node.js project
+    if (codeContent.includes('require(') || codeContent.includes('import ')) {
+      fileName = 'index.js';
+      executeCommand = 'node index.js';
+    }
+
+    // Write code to temporary file on Server PC
+    const tempFile = path.join(os.tmpdir(), `${project.giteaRepoName}_${Date.now()}.tmp`);
+    await fs.writeFile(tempFile, codeContent, 'utf8');
+    
+    addLog('info', 'Code written to temporary file');
+
+    // Transfer file to Raspberry Pi
+    const remotePath = `${projectDir}/${fileName}`;
+    await ssh.putFile(tempFile, remotePath);
+    addLog('success', `Code transferred successfully to ${remotePath}`);
+
+    // Make file executable
+    await ssh.execCommand(`chmod +x ${remotePath}`);
+    addLog('info', 'File permissions set');
+
+    // Check for and install dependencies
+    if (fileName === 'main.py') {
+      // Check for requirements.txt
+      const reqCheck = await ssh.execCommand(`test -f ${projectDir}/requirements.txt && echo "exists"`);
+      if (reqCheck.stdout.trim() === 'exists') {
+        addLog('info', 'Installing Python dependencies...');
+        const installResult = await ssh.execCommand(`pip3 install -r ${projectDir}/requirements.txt`);
+        if (installResult.code !== 0) {
+          addLog('warning', `Dependency installation warning: ${installResult.stderr}`);
+        } else {
+          addLog('success', 'Python dependencies installed successfully');
+        }
+      }
+    } else if (fileName === 'index.js') {
+      // Check for package.json
+      const pkgCheck = await ssh.execCommand(`test -f ${projectDir}/package.json && echo "exists"`);
+      if (pkgCheck.stdout.trim() === 'exists') {
+        addLog('info', 'Installing Node.js dependencies...');
+        const installResult = await ssh.execCommand(`cd ${projectDir} && npm install`);
+        if (installResult.code !== 0) {
+          addLog('warning', `Dependency installation warning: ${installResult.stderr}`);
+        } else {
+          addLog('success', 'Node.js dependencies installed successfully');
+        }
+      }
+    }
+
+    // Execute the code
+    addLog('info', `Executing: ${executeCommand}`);
+    const execResult = await ssh.execCommand(`cd ${projectDir} && ${executeCommand}`, {
+      cwd: projectDir,
+    });
+    
+    if (execResult.code !== 0) {
+      addLog('error', `Execution error: ${execResult.stderr}`);
+    } else {
+      addLog('success', 'Code executed successfully');
+    }
+
+    // Capture output
+    if (execResult.stdout) {
+      addLog('info', `Output: ${execResult.stdout}`);
+    }
+    if (execResult.stderr) {
+      addLog('warning', `Stderr: ${execResult.stderr}`);
+    }
+
+    // Clean up temporary file
+    await fs.unlink(tempFile).catch((err) => {
+      addLog('warning', `Failed to clean up temp file: ${err.message}`);
+    });
+
+    ssh.dispose();
+
+    return {
+      success: execResult.code === 0,
+      message: execResult.code === 0 
+        ? 'Deployment to Raspberry Pi completed successfully' 
+        : 'Deployment completed with warnings',
+      logs: deploymentLog,
+      output: execResult.stdout,
+      error: execResult.stderr,
+      projectPath: projectDir,
+    };
+
+  } catch (error) {
+    addLog('error', `Deployment failed: ${error.message}`);
+    ssh.dispose();
+    
+    return {
+      success: false,
+      message: 'Deployment to Raspberry Pi failed',
+      logs: deploymentLog,
+      error: error.message,
+    };
+  }
+}
+module.exports = { deployToArduinoESP32, deployToRaspberryPi };

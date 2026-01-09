@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
 const { protect } = require('../middleware/auth');
-const { deployToArduinoESP32 } = require('../services/deviceDeployment');
+const { deployToArduinoESP32, deployToRaspberryPi } = require('../services/deviceDeployment');
 const Project = require('../models/Project');
 const giteaService = require('../services/gitea');
 
@@ -118,6 +118,84 @@ catch (error) {
       success: false,
       message: 'Server error during device deployment',
       error: error.message 
+    });
+  }
+});
+
+// @route   POST /api/deploy/raspberry-pi
+// @desc    Deploy project to Raspberry Pi via SSH
+// @access  Private
+router.post('/raspberry-pi', protect, async (req, res) => {
+  try {
+    console.log('=== RASPBERRY PI DEPLOYMENT DEBUG ===');
+    const { projectId, ipAddress, codeContent } = req.body;
+    
+    console.log('Request body:', {
+      projectId,
+      ipAddress,
+      codeContentLength: codeContent?.length
+    });
+
+    // Validation
+    if (!projectId || !ipAddress || !codeContent) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide projectId, ipAddress, and codeContent'
+      });
+    }
+
+    console.log('Validation passed');
+
+    // Find project by giteaRepoId
+    console.log('About to query project with giteaRepoId:', projectId);
+    const project = await Project.findOne({ giteaRepoId: parseInt(projectId) });
+    console.log('Query completed. Project found:', project ? project.name : 'null');
+
+    if (!project) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Project not found' 
+      });
+    }
+
+    console.log('Found project:', project.name, 'with repo:', project.giteaRepoName);
+
+    // Deploy to Raspberry Pi via SSH
+    console.log('Calling deployToRaspberryPi...');
+    const deploymentResult = await deployToRaspberryPi({
+      ipAddress,
+      project,
+      codeContent
+    });
+
+    console.log('Deployment result:', {
+      success: deploymentResult.success,
+      message: deploymentResult.message
+    });
+
+    if (deploymentResult.success) {
+      res.json({
+        success: true,
+        message: deploymentResult.message,
+        logs: deploymentResult.logs,
+        output: deploymentResult.output,
+        projectPath: deploymentResult.projectPath,
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: deploymentResult.message,
+        logs: deploymentResult.logs,
+        error: deploymentResult.error,
+      });
+    }
+
+  } catch (error) {
+    console.error('Raspberry Pi deployment error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during Raspberry Pi deployment',
+      error: error.message
     });
   }
 });

@@ -199,6 +199,26 @@ export const serialAPI = {
   },
 };
 
+// Raspberry Pi SSH Deployment API
+export const raspberryPiAPI = {
+  deploy: async (projectId: string, ipAddress: string, code: string) => {
+    const response = await fetch(`${API_BASE_URL}/deploy/raspberry-pi`, {
+      headers: getAuthHeaders(),
+      method: 'POST',
+      body: JSON.stringify({ 
+        projectId, 
+        ipAddress, 
+        codeContent: code 
+      }),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to deploy to Raspberry Pi');
+    }
+    return response.json();
+  },
+};
+
 // Docker APIs
 export const dockerAPI = {
   generateManifest: async (projectId: string, config: any) => {
