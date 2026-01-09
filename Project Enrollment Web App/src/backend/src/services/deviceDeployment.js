@@ -297,13 +297,13 @@ async function deployToRaspberryPi({ ipAddress, project, codeContent }) {
       addLog('success', 'Code executed successfully');
 
             // Open file in Thonny on Raspberry Pi
-                  const thonnyResult = await ssh.execCommand(`DISPLAY=:0 thonny ${remotePath} &`);
-                        if (thonnyResult.code === 0) {
-                                  addLog('success', 'File opened in Thonny on Raspberry Pi');
-                                        } else {
-                                                  addLog('warning', 'Could not open Thonny automatically');
-                                                        }
-    }
+      // Open file in Thonny on Raspberry Pi (non-blocking)
+      const thonnyResult = await ssh.execCommand(`DISPLAY=:0 thonny ${remotePath} &`);
+      if (thonnyResult.code === 0) {
+        addLog('success', 'File opened in Thonny on Raspberry Pi');
+      } else {
+        addLog('warning', 'Could not open Thonny automatically');
+      }    }
 
     // Capture output
     if (execResult.stdout) {
@@ -314,7 +314,7 @@ async function deployToRaspberryPi({ ipAddress, project, codeContent }) {
     }
 
     // Clean up temporary file
-    await fs.unlink(tempFile).catch((err) => {
+    await fsPromises.unlink(tempFile).catch((err) => {
       addLog('warning', `Failed to clean up temp file: ${err.message}`);
     });
 
