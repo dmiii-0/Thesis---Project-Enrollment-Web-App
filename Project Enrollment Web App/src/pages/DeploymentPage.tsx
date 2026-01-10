@@ -609,22 +609,84 @@ services:
                     </h3>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <p className="text-sm text-gray-700 dark:text-gray-300">
-                      Follow these steps to run your project with Docker:
-                    </p>
-                    <ol className="list-decimal list-inside space-y-2 text-sm ml-2">
-                      <li>Copy the docker-compose.yml content above</li>
-                      <li>Save it as <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded text-xs">docker-compose.yml</code> in your project directory</li>
-                      <li>Open a terminal in your project directory</li>
-                      <li>Run: <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-xs font-mono">docker-compose up -d</code></li>
-                      <li>Access your application at <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded text-xs">http://localhost:3000</code></li>
-                    </ol>
-                    <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                      <p className="text-xs font-medium text-blue-800 dark:text-blue-200">
-                        💡 Note: Make sure Docker is installed and running on your machine before executing these commands.
-                      </p>
-                    </div>
-                  </CardContent>
+<div className="space-y-6">
+                <div>
+                  <h4 className="font-semibold mb-2">📋 Prerequisites</h4>
+                  <ul className="list-disc list-inside space-y-1 text-sm">
+                    <li>Docker Desktop installed and running (<a href="https://www.docker.com/products/docker-desktop/" target="_blank" className="text-blue-500 hover:underline">Download here</a>)</li>
+                    <li>Docker Compose (included with Docker Desktop)</li>
+                    <li>Port 3000 available (or modify the port in docker-compose.yml)</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">🚀 Step-by-Step Deployment</h4>
+                  <ol className="list-decimal list-inside space-y-3 text-sm">
+                    <li>
+                      <strong>Verify Docker is running:</strong>
+                      <code className="block bg-gray-800 text-white p-2 rounded mt-1 ml-6">docker --version</code>
+                      <code className="block bg-gray-800 text-white p-2 rounded mt-1 ml-6">docker-compose --version</code>
+                    </li>
+                    <li>
+                      <strong>Create project directory:</strong>
+                      <code className="block bg-gray-800 text-white p-2 rounded mt-1 ml-6">mkdir my-web-app && cd my-web-app</code>
+                    </li>
+                    <li>
+                      <strong>Save the docker-compose.yml:</strong>
+                      <div className="ml-6 mt-1 text-xs">Copy the docker-compose.yml content above and save it in your project directory</div>
+                    </li>
+                    <li>
+                      <strong>Ensure you have a Dockerfile:</strong>
+                      <div className="ml-6 mt-1 text-xs">The <code>build: .</code> requires a Dockerfile in the same directory. Make sure it's present.</div>
+                    </li>
+                    <li>
+                      <strong>Build and start the containers:</strong>
+                      <code className="block bg-gray-800 text-white p-2 rounded mt-1 ml-6">docker-compose up -d</code>
+                      <div className="ml-6 mt-1 text-xs">The <code>-d</code> flag runs containers in detached mode (background)</div>
+                    </li>
+                    <li>
+                      <strong>Verify containers are running:</strong>
+                      <code className="block bg-gray-800 text-white p-2 rounded mt-1 ml-6">docker-compose ps</code>
+                    </li>
+                    <li>
+                      <strong>Access your application:</strong>
+                      <div className="ml-6 mt-1">Open <a href="http://localhost:3000" target="_blank" className="text-blue-500 hover:underline">http://localhost:3000</a> in your browser</div>
+                    </li>
+                  </ol>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">🛠️ Container Management Commands</h4>
+                  <ul className="space-y-2 text-sm">
+                    <li>
+                      <strong>View logs:</strong>
+                      <code className="block bg-gray-800 text-white p-2 rounded mt-1">docker-compose logs -f</code>
+                    </li>
+                    <li>
+                      <strong>Stop containers:</strong>
+                      <code className="block bg-gray-800 text-white p-2 rounded mt-1">docker-compose stop</code>
+                    </li>
+                    <li>
+                      <strong>Start stopped containers:</strong>
+                      <code className="block bg-gray-800 text-white p-2 rounded mt-1">docker-compose start</code>
+                    </li>
+                    <li>
+                      <strong>Rebuild after changes:</strong>
+                      <code className="block bg-gray-800 text-white p-2 rounded mt-1">docker-compose up -d --build</code>
+                    </li>
+                    <li>
+                      <strong>Stop and remove everything:</strong>
+                      <code className="block bg-gray-800 text-white p-2 rounded mt-1">docker-compose down</code>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                  <p className="text-xs font-medium text-yellow-800">
+                    ⚠️ <strong>Note:</strong> Make sure Docker Desktop is running before executing these commands. If you encounter port conflicts, modify the ports in docker-compose.yml (e.g., change "3000:3000" to "8080:3000").
+                  </p>
+                </div>
+              </div>                  </CardContent>
                 </Card>
 
                 </div>
