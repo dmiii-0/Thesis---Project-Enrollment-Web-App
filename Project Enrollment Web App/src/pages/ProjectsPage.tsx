@@ -148,6 +148,11 @@ export function ProjectsPage({ user, onLogout }: ProjectsPageProps) {
           <p className="text-gray-600 dark:text-gray-400">
             Browse and manage all your project repositories
           </p>
+                      <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                ℹ️ <strong>Note:</strong> For Project Deletion, please contact your Administrator
+              </p>
+            </div>
         </div>
 
         {/* Search and Filters */}
