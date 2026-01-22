@@ -110,7 +110,7 @@ export function RegisterPage() {
               <Input
                 id="studentId"
                 type="text"
-                placeholder={formData.role === 'student' ? '2120123' : 'EMP-12345'}
+                placeholder={formData.role === 'student' ? '2024-12345' : 'EMP-12345'}
                 value={formData.studentId}
                 onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
                 required

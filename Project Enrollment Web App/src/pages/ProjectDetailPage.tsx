@@ -158,7 +158,6 @@ export function ProjectDetailPage({ user, onLogout }: ProjectDetailPageProps) {
             </p>
           </div>
           <div className="flex gap-2">
-                            {user?.role === 'instructor' && (
             <Button
               variant="outline"
               onClick={() => window.open(project.html_url, '_blank')}
@@ -166,7 +165,6 @@ export function ProjectDetailPage({ user, onLogout }: ProjectDetailPageProps) {
               <ExternalLink className="w-4 h-4 mr-2" />
               View on Gitea
             </Button>
-                            )}
             <Link to={`/deploy/${project.id}`}>
               <Button>
                 <Rocket className="w-4 h-4 mr-2" />
@@ -234,13 +232,12 @@ export function ProjectDetailPage({ user, onLogout }: ProjectDetailPageProps) {
           <Tabs defaultValue="files">
             <CardHeader>
               <TabsList className="w-full justify-start">
-{user?.role === 'instructor' && (                <TabsTrigger value="files">Files</TabsTrigger>)}
+                <TabsTrigger value="files">Files</TabsTrigger>
                 <TabsTrigger value="info">Information</TabsTrigger>
               </TabsList>
             </CardHeader>
 
             <CardContent>
-                              {user?.role === 'instructor' && (
               <TabsContent value="files" className="space-y-4">
                 <div className="space-y-2">
                   {files.length === 0 ? (
@@ -278,12 +275,10 @@ export function ProjectDetailPage({ user, onLogout }: ProjectDetailPageProps) {
                   )}
                 </div>
               </TabsContent>
-                              )}
 
 
               <TabsContent value="info" className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                
                   <div>
                     <h3 className="text-sm text-gray-600 dark:text-gray-400 mb-1">Repository URL</h3>
                     <a
@@ -313,9 +308,7 @@ export function ProjectDetailPage({ user, onLogout }: ProjectDetailPageProps) {
                         Copy
                       </Button>
                     </div>
-                                  
                   </div>
-                
 
                   <div>
                     <h3 className="text-sm text-gray-600 dark:text-gray-400 mb-1">Default Branch</h3>
