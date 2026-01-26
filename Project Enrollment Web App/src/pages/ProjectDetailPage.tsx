@@ -49,7 +49,15 @@ export function ProjectDetailPage({ user, onLogout }: ProjectDetailPageProps) {
         return;
       }
 
-      setProject(repo);
+            // Fetch MongoDB project data to get creator info
+      const allProjects = await projectAPI.getProjects();
+      const mongoProject = allProjects.find((p: any) => p.giteaRepoName === repo.name);
+      if (mongoProject) {
+        setProject({ ...repo, createdBy: mongoProject.createdBy });
+      } else {
+        setProject(repo);
+      }
+
 
       // Load repository files
       try {
@@ -184,9 +192,8 @@ export function ProjectDetailPage({ user, onLogout }: ProjectDetailPageProps) {
                 <Star className="w-5 h-5 text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Stars</p>
-                <p className="text-xl text-gray-900 dark:text-white">{project.stars_count}</p>
-              </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Created By</p>
+                <p className="text-xl text-gray-900 dark:text-white">{project?.createdBy?.name || 'Unknown'}</p>              </div>
             </CardContent>
           </Card>
 
