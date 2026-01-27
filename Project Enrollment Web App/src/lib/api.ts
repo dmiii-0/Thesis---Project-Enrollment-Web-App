@@ -178,6 +178,7 @@ const data = await response.json();
     if (!response.ok) throw new Error('Failed to upload documentation');
     return response.json();
   },
+
 };
 
 // Serial Port APIs (for COM port scanning and serial monitor)

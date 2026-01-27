@@ -4,6 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const Project = require('../models/Project');
+const User = require('../models/User');
 const { protect } = require('../middleware/auth');
 const giteaService = require('../services/gitea');
 
@@ -246,7 +247,13 @@ router.post('/', protect, async (req, res) => {
     }
 
     // Create project in MongoDB
-        console.log('DEBUG - giteaRepo:', giteaRepo);
+
+        // Fetch user's role from database
+    const currentUser = await User.findById(req.user._id).select('role');
+    if (!currentUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const userRole = currentUser.role;
     project= await Project.create({
       name,
       description,
@@ -259,6 +266,10 @@ router.post('/', protect, async (req, res) => {
       ports: ports || [],
       dockerManifest: dockerManifest || '',
       status: 'active',
+            enrolledStudents: [{
+        userId: req.user._id,
+        role: userRole
+      }],
     });
         await project.save();
 
@@ -516,4 +527,70 @@ router.get('/:id/file-content/:filename', protect, async (req, res) => {
 });
 
 
+
+// @route   POST /api/projects/:id/enroll
+// @desc    Enroll student in a project
+// @access  Private
+router.post('/:id/enroll', protect, async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+    
+    // Check if user is already enrolled
+    const alreadyEnrolled = project.enrolledStudents.some(
+      enrollment => enrollment.userId.toString() === req.user._id.toString()
+    );
+    
+    if (alreadyEnrolled) {
+      return res.status(400).json({ message: 'Already enrolled in this project' });
+    }
+    
+    // Add user to enrolled students with their role from user model
+    project.enrolledStudents.push({
+      userId: req.user._id,
+      role: req.user.role,
+    });
+    
+    await project.save();
+    
+    res.json({ message: 'Successfully enrolled in project', project });
+  } catch (error) {
+    console.error('Error enrolling in project:', error);
+    res.status(500).json({ 
+      message: 'Server error while enrolling in project',
+      error: error.message 
+    });
+  }
+});
+
+// @route   DELETE /api/projects/:id/enroll
+// @desc    Unenroll from a project
+// @access  Private
+router.delete('/:id/enroll', protect, async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+    
+    // Remove user from enrolled students
+    project.enrolledStudents = project.enrolledStudents.filter(
+      enrollment => enrollment.userId.toString() !== req.user._id.toString()
+    );
+    
+    await project.save();
+    
+    res.json({ message: 'Successfully unenrolled from project', project });
+  } catch (error) {
+    console.error('Error unenrolling from project:', error);
+    res.status(500).json({ 
+      message: 'Server error while unenrolling from project',
+      error: error.message 
+    });
+  }
+});
 module.exports = router;

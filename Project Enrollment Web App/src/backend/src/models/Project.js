@@ -54,6 +54,22 @@ const projectSchema = new mongoose.Schema({
     enum: ['active', 'archived'],
     default: 'active',
   },
+    enrolledStudents: [{
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: ['student', 'instructor'],
+      required: true,
+    },
+    enrolledAt: {
+      type: Date,
+      default: Date.now,
+    },
+  }],
   createdAt: {
     type: Date,
     default: Date.now,
