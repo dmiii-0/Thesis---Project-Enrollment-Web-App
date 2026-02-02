@@ -32,6 +32,7 @@ export function ProjectDetailPage({ user, onLogout }: ProjectDetailPageProps) {
   const [files, setFiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+    const [hasFullAccess, setHasFullAccess] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -54,9 +55,17 @@ export function ProjectDetailPage({ user, onLogout }: ProjectDetailPageProps) {
       const mongoProject = allProjects.find((p: any) => p.giteaRepoName === repo.name);
       if (mongoProject) {
         setProject({ ...repo, createdBy: mongoProject.createdBy });
+
+                // Determine if user has full access (Instructors always have full access, Students only for their own projects)
+        const isInstructor = user?.role === 'instructor';
+        const isOwner = user?.name && mongoProject?.createdByName && user.name === mongoProject.createdByName;        setHasFullAccess(isInstructor || isOwner);
       } else {
-        setProject(repo);
-      }
+                setHasFullAccess(isInstructor || isOwner);
+                console.log('DEBUG - user:', user);
+        console.log('DEBUG - mongoProject:', mongoProject);
+        console.log('DEBUG - isInstructor:', isInstructor);
+        console.log('DEBUG - isOwner:', isOwner);
+        setProject(repo);      }
 
 
       // Load repository files
@@ -167,13 +176,13 @@ export function ProjectDetailPage({ user, onLogout }: ProjectDetailPageProps) {
           </div>
           <div className="flex gap-2">
                             
-            <Button
+            {hasFullAccess && (<Button
               variant="outline"
               onClick={() => window.open(project.html_url, '_blank')}
             >
               <ExternalLink className="w-4 h-4 mr-2" />
               View on Gitea
-            </Button>
+            </Button>)}
                             
             <Link to={`/deploy/${project.id}`}>
               <Button>
@@ -243,7 +252,7 @@ export function ProjectDetailPage({ user, onLogout }: ProjectDetailPageProps) {
               <TabsList className="w-full justify-start">
                                 <TabsTrigger value="files">Files</TabsTrigger>
 
-                <TabsTrigger value="info">Information</TabsTrigger>
+                {hasFullAccess && <TabsTrigger value="info">Information</TabsTrigger>}
               </TabsList>
             </CardHeader>
 
@@ -289,7 +298,7 @@ export function ProjectDetailPage({ user, onLogout }: ProjectDetailPageProps) {
                               
 
 
-              <TabsContent value="info" className="space-y-4">
+              {hasFullAccess && (<TabsContent value="info" className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 
                   <div>
@@ -347,7 +356,7 @@ export function ProjectDetailPage({ user, onLogout }: ProjectDetailPageProps) {
                     </Badge>
                   </div>
                 </div>
-              </TabsContent>
+              </TabsContent>)}
             </CardContent>
           </Tabs>
         </Card>
