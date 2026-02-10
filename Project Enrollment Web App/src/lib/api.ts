@@ -1,8 +1,8 @@
 // API Configuration
 const API_BASE_URL = import.meta?.env?.VITE_API_URL || 'http://localhost:3001/api';
-const GITEA_BASE_URL = 'https://gitea.com/api/v1';
-const GITEA_TOKEN = 'e8234eb47a247328bda32d6f8852a6fe720b93ad';
-const GITEA_OWNER = 'dmiii-0';
+const GITEA_BASE_URL = 'http://localhost:3002/api/v1;
+const GITEA_TOKEN = 'f43272c561eeb92d27d214f6579103f128c71e03';
+const GITEA_OWNER = 'admin';
 
 // Helper function to get auth headers
 const getAuthHeaders = () => {

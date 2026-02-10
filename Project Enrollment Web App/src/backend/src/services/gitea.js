@@ -1,9 +1,9 @@
 const axios = require('axios');
 
 // Gitea API configuration
-const GITEA_BASE_URL = `${process.env.GITEA_URL || 'https://gitea.com'}/api/v1`;
+const GITEA_BASE_URL = `${process.env.GITEA_URL || 'http://localhost:3002'}/api/v1`;
 const GITEA_TOKEN = process.env.GITEA_TOKEN;
-const GITEA_OWNER = process.env.GITEA_OWNER || 'dmiii-0';
+const GITEA_OWNER = process.env.GITEA_OWNER || 'admin';
 
 // Create axios instance with default config
 const giteaApi = axios.create({

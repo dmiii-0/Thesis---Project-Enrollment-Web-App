@@ -25,7 +25,7 @@ router.post('/device', async (req, res) => {
     // Fetch Gitea repo by ID and find MongoDB project by repo name
         let giteaRepo;
     try {
-            giteaRepo = await giteaService.getRepository('dmiii-0', projectId);
+            giteaRepo = await giteaService.getRepository(giteaService.GITEA_OWNER, projectId);
                 } catch (err) {
                         console.error('Gitea fetch failed:', err.message);
                             }
