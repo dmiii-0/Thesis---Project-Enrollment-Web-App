@@ -240,14 +240,14 @@ const contents = await giteaAPI.getRepoContents(project.name);
   const toggleSerialMonitor = () => {
     if (serialConnected) {
       setSerialConnected(false);
-      addSerialOutput('❌ Serial monitor disconnected');
+      addSerialOutput('❌ Terminal monitor disconnected');
     } else {
       if (!selectedPort) {
         toast.error('Please select a COM port');
         return;
       }
       setSerialConnected(true);
-      addSerialOutput('✅ Serial monitor connected');
+      addSerialOutput('✅ Terminal monitor connected');
       addSerialOutput(`📡 Listening on ${selectedPort}...`);
       
       // Simulate receiving data
@@ -515,10 +515,10 @@ const contents = await giteaAPI.getRepoContents(project.name);
                     </Button>
                   </div>
 
-                  {/* Right Column - Serial Monitor */}
+                  {/* Right Column - Terminal Monitor */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <Label>Serial Monitor</Label>
+                      <Label>Terminal Monitor</Label>
                       <div className="flex gap-2">
                         <Button
                           size="sm"
@@ -558,7 +558,7 @@ const contents = await giteaAPI.getRepoContents(project.name);
                             <div className="flex items-center justify-center h-full text-gray-500">
                               <div className="text-center">
                                 <Terminal className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                                <p>Serial monitor not connected</p>
+                                <p>Terminal monitor not connected</p>
                                 <p className="text-xs mt-2">Click "Connect" to start monitoring</p>
                               </div>
                             </div>
