@@ -282,21 +282,13 @@ export function ProjectDetailPage({ user, onLogout }: ProjectDetailPageProps) {
                               </p>
                             </div>
                           </div>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => window.open(file.download_url, '_blank')}
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
+                          
                         </div>
                       );
                     })
                   )}
                 </div>
               </TabsContent>
-                              
-
 
               {hasFullAccess && (<TabsContent value="info" className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
