@@ -132,13 +132,41 @@ async function createFile(owner, repo, filepath, content, message) {
 }
 
 /**
+ * Update an existing file in a Gitea repository
+ * @param {string} owner - Repository owner
+ * @param {string} repo - Repository name
+ * @param {string} filepath - Path to the file
+ * @param {string} content - New file content (plain text)
+ * @param {string} message - Commit message
+ * @returns {Promise<Object>} Updated file data
+ */
+async function updateFile(owner, repo, filepath, content, message) {
+  try {
+    // First get the current file SHA (required for update)
+    const fileRes = await giteaApi.get(`/repos/${owner}/${repo}/contents/${filepath}`);
+    const sha = fileRes.data.sha;
+    const encodedContent = Buffer.from(content).toString('base64');
+    const response = await giteaApi.put(`/repos/${owner}/${repo}/contents/${filepath}`, {
+      message,
+      content: encodedContent,
+      sha,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating file in Gitea:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to update file in Gitea');
+  }
+}
+
+
+/**
  * Initialize repository with project structure
  * @param {string} owner - Repository owner
  * @param {string} repo - Repository name
  * @param {string} deviceType - Type of device/project
  * @returns {Promise<void>}
  */
-async function initializeProjectStructure(owner, repo, deviceType) {
+async function initializeProjectStructure(owner, repo, deviceType, description = '') {
   try {
     // Create appropriate project structure based on device type
     let files = [];
@@ -289,6 +317,7 @@ module.exports = {
   getRepository,
   deleteRepository,
   createFile,
+    updateFile,
   initializeProjectStructure,
   getRepositoryContents,
   getFileContent,

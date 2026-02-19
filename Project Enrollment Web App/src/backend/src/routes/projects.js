@@ -225,7 +225,8 @@ router.post('/', protect, async (req, res) => {
       await giteaService.initializeProjectStructure(
         giteaService.GITEA_OWNER,
         giteaRepoName,
-        deviceType
+        deviceType,
+              description
       );
       
       console.log(`✅ Gitea repository created: ${giteaRepoUrl}`);
@@ -291,6 +292,23 @@ router.post('/', protect, async (req, res) => {
         }
       }
     }
+
+            // Update README.md with the project description from enrollment
+        if (description) {
+          try {
+            const readmeContent = `# ${name}\n\n${description}\n`;
+            await giteaService.updateFile(
+              giteaService.GITEA_OWNER,
+              giteaRepoName,
+              'README.md',
+              readmeContent,
+              'docs: update README with project description'
+            );
+            console.log('README.md updated with project description');
+          } catch (readmeErr) {
+            console.warn('Failed to update README.md:', readmeErr.message);
+          }
+        }
 
     if (req.body.documentationFile) {
       try {
