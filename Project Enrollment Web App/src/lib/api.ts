@@ -1,8 +1,5 @@
 // API Configuration
 const API_BASE_URL = import.meta?.env?.VITE_API_URL || 'http://localhost:3001/api';
-const GITEA_BASE_URL = 'https://gitea.com/api/v1';
-const GITEA_TOKEN = '4464009b78d5595bd0fc1d2639e3c1caaf35e10c';
-const GITEA_OWNER = 'admin_ublc';
 
 // Helper function to get auth headers
 const getAuthHeaders = () => {
@@ -36,21 +33,19 @@ export const authAPI = {
   },
 };
 
-// Gitea APIs
+// Gitea APIs - All calls proxied through backend to prevent CORS
 export const giteaAPI = {
   createRepository: async (repoData: any) => {
-    const response = await fetch(`${GITEA_BASE_URL}/user/repos`, {
+    const response = await fetch(`${API_BASE_URL}/projects/gitea/repos`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `token ${GITEA_TOKEN}`,
+        ...getAuthHeaders(),
       },
       body: JSON.stringify({
         name: repoData.name,
         description: repoData.description,
-        private: false,
-        auto_init: true,
-        default_branch: 'main',
+        isPrivate: repoData.private || false,
       }),
     });
     if (!response.ok) {
@@ -61,58 +56,45 @@ export const giteaAPI = {
   },
 
   getRepositories: async () => {
-    const response = await fetch(`${GITEA_BASE_URL}/user/repos`, {
-      headers: {
-        'Authorization': `token ${GITEA_TOKEN}`,
-      },
+    const response = await fetch(`${API_BASE_URL}/projects/gitea/repos`, {
+      headers: getAuthHeaders(),
     });
     if (!response.ok) throw new Error('Failed to fetch repositories');
     return response.json();
   },
 
   getRepository: async (repoName: string) => {
-    const response = await fetch(`${GITEA_BASE_URL}/repos/${GITEA_OWNER}/${repoName}`, {
-      headers: {
-        'Authorization': `token ${GITEA_TOKEN}`,
-      },
+    const response = await fetch(`${API_BASE_URL}/projects/gitea/repos/${repoName}`, {
+      headers: getAuthHeaders(),
     });
     if (!response.ok) throw new Error('Failed to fetch repository');
     return response.json();
   },
 
   getRepoContents: async (repoName: string, path: string = '') => {
-    const response = await fetch(
-      `${GITEA_BASE_URL}/repos/${GITEA_OWNER}/${repoName}/contents/${path}`,
-      {
-        headers: {
-          'Authorization': `token ${GITEA_TOKEN}`,
-        },
-      }
-    );
+    const url = path
+      ? `${API_BASE_URL}/projects/gitea/repos/${repoName}/contents/${path}`
+      : `${API_BASE_URL}/projects/gitea/repos/${repoName}/contents`;
+    const response = await fetch(url, {
+      headers: getAuthHeaders(),
+    });
     if (!response.ok) throw new Error('Failed to fetch repository contents');
     return response.json();
   },
 
   createFile: async (repoName: string, filePath: string, content: string, message: string) => {
-    const response = await fetch(
-      `${GITEA_BASE_URL}/repos/${GITEA_OWNER}/${repoName}/contents/${filePath}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `token ${GITEA_TOKEN}`,
-        },
-        body: JSON.stringify({
-          content: btoa(content),
-          message,
-        }),
-      }
-    );
+    const response = await fetch(`${API_BASE_URL}/projects/gitea/repos/${repoName}/contents/${filePath}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify({ content: btoa(content), message }),
+    });
     if (!response.ok) {
-            const error = await response.json();
-                  // Check if file already exists - treat as success
+      const error = await response.json();
       if (error.message?.includes('already exists') || response.status === 409) {
-console.warn(`File ${filePath} already exists in ${repoName}, skipping...`);
+        console.warn(`File ${filePath} already exists in ${repoName}, skipping...`);
         return { success: true, skipped: true, message: `File ${filePath} already exists` };
       }
       throw new Error(error.message || 'Failed to create file');

@@ -55,7 +55,7 @@ GITEA_OWNER=your_username_or_org
   
 - **GITEA_OWNER**: Your username or organization name
   - This is where repositories will be created
-  - Example: `dmiii-0` (for user repositories)
+  - Example: `admin_ublc` (for user repositories)
   - Example: `ub-projects` (for organization repositories)
 
 ## Step 3: Test Connection

@@ -470,7 +470,7 @@ Failed to create Gitea repository
 
 4. **Verify GITEA_OWNER** in `backend/.env`:
    ```env
-   GITEA_OWNER=dmiii-0
+   GITEA_OWNER=admin_ublc
    ```
 
 ### ❌ Can't See Repository Files
@@ -490,7 +490,7 @@ Failed to create Gitea repository
 5. **Test API directly**:
    ```bash
    curl -H "Authorization: token YOUR_TOKEN" \
-     https://gitea.com/api/v1/repos/dmiii-0/REPO_NAME/contents
+     https://gitea.com/api/v1/repos/admin_ublc/REPO_NAME/contents
    ```
 
 ### ❌ Repository Not Found
@@ -506,7 +506,7 @@ Failed to create Gitea repository
 
 2. **Verify owner** in `backend/.env`:
    ```env
-   GITEA_OWNER=dmiii-0
+   GITEA_OWNER=admin_ublc
    ```
 
 3. **Check if repository is private**: Token needs access

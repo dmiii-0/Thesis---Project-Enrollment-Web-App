@@ -593,4 +593,92 @@ router.delete('/:id/enroll', protect, async (req, res) => {
     });
   }
 });
+
+// ============================================================
+// GITEA PROXY ROUTES - Prevent CORS by routing through backend
+// ============================================================
+
+// @route  GET /api/projects/gitea/repos
+// @desc   Get all Gitea repositories (proxied)
+// @access Private
+router.get('/gitea/repos', protect, async (req, res) => {
+  try {
+    const repos = await giteaService.listRepositories();
+    res.json(repos);
+  } catch (error) {
+    console.error('Error fetching Gitea repos:', error);
+    res.status(500).json({ message: 'Failed to fetch repositories', error: error.message });
+  }
+});
+
+// @route  GET /api/projects/gitea/repos/:repoName
+// @desc   Get a single Gitea repository (proxied)
+// @access Private
+router.get('/gitea/repos/:repoName', protect, async (req, res) => {
+  try {
+    const repo = await giteaService.getRepository(req.params.repoName);
+    res.json(repo);
+  } catch (error) {
+    console.error('Error fetching Gitea repo:', error);
+    res.status(500).json({ message: 'Failed to fetch repository', error: error.message });
+  }
+});
+
+// @route  GET /api/projects/gitea/repos/:repoName/contents
+// @route  GET /api/projects/gitea/repos/:repoName/contents/*
+// @desc   Get repository file contents (proxied)
+// @access Private
+router.get('/gitea/repos/:repoName/contents', protect, async (req, res) => {
+  try {
+    const contents = await giteaService.getRepositoryContents(req.params.repoName, '');
+    res.json(contents);
+  } catch (error) {
+    console.error('Error fetching repo contents:', error);
+    res.status(500).json({ message: 'Failed to fetch repository contents', error: error.message });
+  }
+});
+
+router.get('/gitea/repos/:repoName/contents/*', protect, async (req, res) => {
+  try {
+    const filePath = req.params[0];
+        const contents = await giteaService.getRepositoryContents(req.params.repoName, filePath);
+    res.json(contents);
+  } catch (error) {
+    console.error('Error fetching repo file contents:', error);
+    res.status(500).json({ message: 'Failed to fetch file contents', error: error.message });
+  }
+});
+
+// @route  POST /api/projects/gitea/repos
+// @desc   Create a new Gitea repository (proxied)
+// @access Private
+router.post('/gitea/repos', protect, async (req, res) => {
+  try {
+    const { name, description, isPrivate } = req.body;
+    const repo = await giteaService.createRepository(name, description, isPrivate);
+    res.json(repo);
+  } catch (error) {
+    console.error('Error creating Gitea repo:', error);
+    res.status(500).json({ message: 'Failed to create repository', error: error.message });
+  }
+});
+
+// @route  POST /api/projects/gitea/repos/:repoName/contents/:filePath
+// @desc   Create a file in a Gitea repository (proxied)
+// @access Private
+router.post('/gitea/repos/:repoName/contents/*', protect, async (req, res) => {
+  try {
+    const filePath = req.params[0];
+    const { content, message } = req.body;
+    const result = await giteaService.createFile(req.params.repoName, filePath, content, message);
+    res.json(result);
+  } catch (error) {
+    console.error('Error creating file in repo:', error);
+    res.status(500).json({ message: 'Failed to create file', error: error.message });
+  }
+});
+
+
 module.exports = router;
+
+

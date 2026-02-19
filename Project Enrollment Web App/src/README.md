@@ -121,7 +121,7 @@ JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 # Gitea Configuration
 GITEA_URL=https://gitea.com
 GITEA_TOKEN=8e3b07b99105e50bfff5e05dd410f1439693c07a
-GITEA_OWNER=dmiii-0
+GITEA_OWNER=admin_ublc
 
 # CORS Configuration
 FRONTEND_URL=http://localhost:5173

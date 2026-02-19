@@ -49,7 +49,7 @@ JWT_EXPIRE=30d
 # ==============================================
 GITEA_URL=https://gitea.com
 GITEA_TOKEN=8e3b07b99105e50bfff5e05dd410f1439693c07a
-GITEA_OWNER=dmiii-0
+GITEA_OWNER=admin_ublc
 
 # ==============================================
 # FILE UPLOAD CONFIGURATION
@@ -245,7 +245,7 @@ JWT_SECRET=<YOUR_STRONG_RANDOM_SECRET_HERE>
 JWT_EXPIRE=7d
 GITEA_URL=https://gitea.com
 GITEA_TOKEN=<YOUR_GITEA_TOKEN>
-GITEA_OWNER=dmiii-0
+GITEA_OWNER=admin_ublc
 MAX_FILE_SIZE=10485760
 UPLOAD_PATH=/var/app/uploads
 ```

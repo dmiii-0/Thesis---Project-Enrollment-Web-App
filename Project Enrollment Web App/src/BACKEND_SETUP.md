@@ -82,7 +82,7 @@ JWT_SECRET=ub-project-management-super-secret-jwt-key-2024
 # Gitea Configuration
 GITEA_URL=https://gitea.com
 GITEA_TOKEN=8e3b07b99105e50bfff5e05dd410f1439693c07a
-GITEA_OWNER=dmiii-0
+GITEA_OWNER=admin_ublc
 
 # CORS Configuration
 FRONTEND_URL=http://localhost:5173
