@@ -54,14 +54,20 @@ export function EnrollmentPage({ user, onLogout }: EnrollmentPageProps) {
       const repoName = formData.projectName.toLowerCase().replace(/\s+/g, '-');
       const description = `${formData.projectType === 'device' ? formData.deviceType.toUpperCase() : 'WEB APP'} - ${formData.description}`;
 
-      const repo = await giteaAPI.createRepository({
-        name: repoName,
-        description: description,
-        private: formData.visibility === 'private',
-        auto_init: formData.autoInit,
-      });
+                  // Pre-generate README content to initialize the branch on first commit
+      const readmeContent = formData.projectType === 'device'
+        ? generateDeviceReadme(formData)
+        : generateDockerfile(formData.projectName);
 
-      // Create initial project files
+      const repo = await giteaAPI.createRepository({
+                  name: repoName,
+      description: description,
+      private: formData.visibility === 'private',
+      readmeContent: readmeContent,
+    });
+
+    // Create initial project files
+
       if (formData.autoInit) {
         if (formData.projectType === 'device') {
           // Create README

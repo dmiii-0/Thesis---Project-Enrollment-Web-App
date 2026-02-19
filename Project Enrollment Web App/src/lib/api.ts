@@ -89,7 +89,7 @@ export const giteaAPI = {
         'Content-Type': 'application/json',
         ...getAuthHeaders(),
       },
-      body: JSON.stringify({ content: btoa(content), message }),
+            body: JSON.stringify({ content: content, message }),
     });
     if (!response.ok) {
       const error = await response.json();

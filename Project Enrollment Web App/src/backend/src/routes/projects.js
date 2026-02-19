@@ -616,7 +616,7 @@ router.get('/gitea/repos', protect, async (req, res) => {
 // @access Private
 router.get('/gitea/repos/:repoName', protect, async (req, res) => {
   try {
-    const repo = await giteaService.getRepository(req.params.repoName);
+        const repo = await giteaService.getRepository(giteaService.GITEA_OWNER, req.params.repoName);
     res.json(repo);
   } catch (error) {
     console.error('Error fetching Gitea repo:', error);
@@ -630,7 +630,7 @@ router.get('/gitea/repos/:repoName', protect, async (req, res) => {
 // @access Private
 router.get('/gitea/repos/:repoName/contents', protect, async (req, res) => {
   try {
-    const contents = await giteaService.getRepositoryContents(req.params.repoName, '');
+        const contents = await giteaService.getRepositoryContents(giteaService.GITEA_OWNER, req.params.repoName, '');
     res.json(contents);
   } catch (error) {
     console.error('Error fetching repo contents:', error);
@@ -641,7 +641,7 @@ router.get('/gitea/repos/:repoName/contents', protect, async (req, res) => {
 router.get('/gitea/repos/:repoName/contents/*', protect, async (req, res) => {
   try {
     const filePath = req.params[0];
-        const contents = await giteaService.getRepositoryContents(req.params.repoName, filePath);
+            const contents = await giteaService.getRepositoryContents(giteaService.GITEA_OWNER, req.params.repoName, filePath);
     res.json(contents);
   } catch (error) {
     console.error('Error fetching repo file contents:', error);
@@ -652,10 +652,24 @@ router.get('/gitea/repos/:repoName/contents/*', protect, async (req, res) => {
 // @route  POST /api/projects/gitea/repos
 // @desc   Create a new Gitea repository (proxied)
 // @access Private
-router.post('/gitea/repos', protect, async (req, res) => {
+  router.post('/gitea/repos', protect, async (req, res) => {
   try {
-    const { name, description, isPrivate } = req.body;
+    const { name, description, isPrivate, readmeContent } = req.body;
+
+    // Step 1: Create the Gitea repository (empty, no auto_init)
     const repo = await giteaService.createRepository(name, description, isPrivate);
+
+    // Step 2: Create README.md as the very first commit to initialize the branch
+    // This is required because Gitea cannot accept file commits to a repo with no commits
+    const cleanName = name.toLowerCase().replace(/[\s+]+/g, '-').replace(/[^a-z0-9_-]/g, '-').substring(0, 100);
+    const initialReadme = readmeContent || `# ${name}\n\n${description || 'No description provided.'}\n`;
+    try {
+            await giteaService.createFile(giteaService.GITEA_OWNER, cleanName, 'README.md', initialReadme, 'Initial commit: Add README');
+    } catch (readmeErr) {
+      // Log but don't fail — frontend will handle its own README upload
+      console.warn('Could not create initial README:', readmeErr.message);
+    }
+
     res.json(repo);
   } catch (error) {
     console.error('Error creating Gitea repo:', error);
@@ -663,14 +677,13 @@ router.post('/gitea/repos', protect, async (req, res) => {
   }
 });
 
-// @route  POST /api/projects/gitea/repos/:repoName/contents/:filePath
 // @desc   Create a file in a Gitea repository (proxied)
 // @access Private
 router.post('/gitea/repos/:repoName/contents/*', protect, async (req, res) => {
   try {
     const filePath = req.params[0];
     const { content, message } = req.body;
-    const result = await giteaService.createFile(req.params.repoName, filePath, content, message);
+        const result = await giteaService.createFile(giteaService.GITEA_OWNER, req.params.repoName, filePath, content, message);
     res.json(result);
   } catch (error) {
     console.error('Error creating file in repo:', error);

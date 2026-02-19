@@ -34,7 +34,7 @@ async function createRepository(name, description, isPrivate = false) {
       name: cleanName,
       description: description,
       private: isPrivate,
-      // auto_init: false,  // Disabled - causes GetOrgByName error in some Gitea versions
+              auto_init: false,  // Files are committed manually after creation
       default_branch: 'main',
     });
 
