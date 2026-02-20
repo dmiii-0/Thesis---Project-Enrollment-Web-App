@@ -108,14 +108,16 @@ async function createFile(owner, repo, filepath, content, message) {
   try {
         // Extract base64 from data URL if it's in that format
     let finalContent = content;
+        let isAlreadyBase64 = false;
     if (content && content.startsWith('data:')) {
       const base64Index = content.indexOf(',');
       if (base64Index !== -1) {
         finalContent = content.substring(base64Index + 1);
+                isAlreadyBase64 = true;
       }
     }
     const response = await giteaApi.post(`/repos/${owner}/${repo}/contents/${filepath}`, {
-      content: Buffer.from(finalContent).toString('base64'),
+            content: isAlreadyBase64 ? finalContent : Buffer.from(finalContent).toString('base64'),
       message: message || `Add ${filepath}`,
     });
     return response.data;

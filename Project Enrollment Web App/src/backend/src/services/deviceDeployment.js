@@ -52,8 +52,9 @@ async function deployToArduinoESP32({ comPort, deviceType, project, codeContent 
     
     const sketchFile = path.join(tempDir, 'sketch', 'sketch.ino');
     await fs.promises.mkdir(path.dirname(sketchFile), { recursive: true });
-        // Decode Base64 if needed
-    const decodedContent = Buffer.from(codeContent, 'base64').toString('utf8');
+    
+    // codeContent is already decoded plain text (atob was applied in the frontend)
+    const decodedContent = codeContent;
     await fs.promises.writeFile(sketchFile, decodedContent, 'utf8');    deploymentLog.push(`✅ Code written to temporary file`);
 
     // Step 4: Check Arduino CLI installation
