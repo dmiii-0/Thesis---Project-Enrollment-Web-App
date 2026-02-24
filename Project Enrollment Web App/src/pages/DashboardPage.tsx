@@ -81,13 +81,6 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
       change: '+12%',
     },
     {
-      title: 'Active Projects',
-      value: stats.activeProjects,
-      icon: Clock,
-      color: 'from-green-500 to-green-600',
-      change: '+8%',
-    },
-    {
       title: 'Device Projects',
       value: stats.deviceProjects,
       icon: Cpu,

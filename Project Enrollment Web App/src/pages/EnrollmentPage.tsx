@@ -642,8 +642,10 @@ Upload your project documentation (PDF) using the project management system.
                     <div>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Type</p>
                       <p className="text-gray-900 dark:text-white capitalize">
-                        {formData.projectType === 'device'
+                                  {formData.projectType === 'device'
                           ? `Device (${formData.deviceType})`
+                          : formData.projectType === 'mobile'
+                          ? 'Mobile Application'
                           : 'Web App'}
                       </p>
                     </div>
