@@ -10,7 +10,8 @@ import {
   TrendingUp,
   Clock,
   CheckCircle,
-  AlertCircle 
+  AlertCircle ,
+    Smartphone
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { projectAPI, giteaAPI } from '../lib/api';
@@ -28,6 +29,7 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
     completedProjects: 0,
     deviceProjects: 0,
     webProjects: 0,
+        mobileProjects: 0,
   });
   const [recentProjects, setRecentProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,24 +46,22 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
       ]);
 
       // Calculate stats
-      const deviceProjects = repos.filter((r: any) => 
-        r.description?.toLowerCase().includes('arduino') || 
-        r.description?.toLowerCase().includes('esp32') || 
-        r.description?.toLowerCase().includes('raspberry')
-      ).length;
+              const deviceProjects = projects.filter((p: any) =>
+          ['Arduino', 'ESP32', 'raspberry-pi'].includes(p.deviceType)
+        ).length;
 
-      const webProjects = repos.filter((r: any) => 
-        r.description?.toLowerCase().includes('web') || 
-        r.description?.toLowerCase().includes('docker')
-      ).length;
+        const webProjects = projects.filter((p: any) => p.deviceType === 'web-app').length;
 
-      setStats({
-        totalProjects: repos.length,
-        activeProjects: repos.filter((r: any) => !r.archived).length,
-        completedProjects: repos.filter((r: any) => r.archived).length,
-        deviceProjects,
-        webProjects,
-      });
+        const mobileProjects = projects.filter((p: any) => p.deviceType === 'mobile-app').length;
+
+              setStats({
+          totalProjects: projects.length,
+          activeProjects: projects.filter((p: any) => p.status === 'active').length,
+          completedProjects: projects.filter((p: any) => p.status === 'archived').length,
+          deviceProjects,
+          webProjects,
+          mobileProjects,
+        });
 
       setRecentProjects(repos.slice(0, 5));
     } catch (error: any) {
@@ -100,6 +100,13 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
       icon: Code,
       color: 'from-orange-500 to-orange-600',
       change: '+15%',
+    },
+        {
+      title: 'Mobile Projects',
+      value: stats.mobileProjects,
+      icon: Smartphone,
+      color: 'from-pink-500 to-pink-600',
+      change: '+0%',
     },
   ];
 

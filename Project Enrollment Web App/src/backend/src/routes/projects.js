@@ -622,7 +622,15 @@ router.delete('/:id/enroll', protect, async (req, res) => {
 router.get('/gitea/repos', protect, async (req, res) => {
   try {
     const repos = await giteaService.listRepositories();
-    res.json(repos);
+        // Merge MongoDB deviceType into each Gitea repo
+        const dbProjects = await Project.find({}, 'giteaRepoName deviceType');
+        const projectMap = {};
+        dbProjects.forEach(p => { projectMap[p.giteaRepoName] = p.deviceType; });
+        const enrichedRepos = repos.map(repo => ({
+          ...repo,
+          deviceType: projectMap[repo.name] || null
+        }));
+        res.json(enrichedRepos);
   } catch (error) {
     console.error('Error fetching Gitea repos:', error);
     res.status(500).json({ message: 'Failed to fetch repositories', error: error.message });

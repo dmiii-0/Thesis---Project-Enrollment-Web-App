@@ -12,7 +12,7 @@ const projectSchema = new mongoose.Schema({
   },
   deviceType: {
     type: String,
-    enum: ['Arduino', 'ESP32', 'raspberry-pi', 'web-app'],    required: true,
+        enum: ['Arduino', 'ESP32', 'raspberry-pi', 'web-app', 'mobile-app'],    required: true,
   
   },
   createdBy: {

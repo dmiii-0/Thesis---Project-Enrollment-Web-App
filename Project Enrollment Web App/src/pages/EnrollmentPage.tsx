@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
-import { Loader2, Code, Cpu, FileText, CheckCircle } from 'lucide-react';
+import { Loader2, Code, Cpu, FileText, CheckCircle, Smartphone } from 'lucide-react';
 import { giteaAPI, projectAPI } from '../lib/api';
 import { toast } from 'sonner@2.0.3';
 
@@ -146,7 +146,7 @@ export function EnrollmentPage({ user, onLogout }: EnrollmentPageProps) {
         name: formData.projectName,
         description: formData.description,
         type: formData.projectType,
-        deviceType: formData.projectType === 'web' ? 'web-app' : formData.deviceType,
+                  deviceType: formData.projectType === 'web' ? 'web-app' : formData.projectType === 'mobile' ? 'mobile-app' : formData.deviceType,
         giteaRepoUrl: repo.html_url,
         repoId: repo.id,
         userId: user.id,
@@ -496,7 +496,7 @@ Upload your project documentation (PDF) using the project management system.
                           <div className="flex items-center gap-2 mb-1">
                             <Cpu className="w-5 h-5 text-purple-600" />
                             <Label htmlFor="device" className="cursor-pointer">
-                              Microcontroller Device
+                              Embedded Systems
                             </Label>
                           </div>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -520,6 +520,20 @@ Upload your project documentation (PDF) using the project management system.
                           </p>
                         </div>
                       </div>
+                                  <div className="flex items-start space-x-3 p-4 border rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+              <RadioGroupItem value="mobile" id="mobile" />
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <Smartphone className="w-5 h-5 text-pink-600" />
+                  <Label htmlFor="mobile" className="cursor-pointer">
+                    Mobile Application
+                  </Label>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Android and iOS mobile application projects
+                </p>
+              </div>
+            </div>
                     </RadioGroup>
                   </div>
 

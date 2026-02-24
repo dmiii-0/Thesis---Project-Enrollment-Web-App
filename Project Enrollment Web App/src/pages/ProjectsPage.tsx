@@ -19,7 +19,8 @@ import {
   Star,
   Clock,
   Cpu,
-  Code 
+  Code ,
+  Smartphone
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { giteaAPI } from '../lib/api';
@@ -72,19 +73,16 @@ export function ProjectsPage({ user, onLogout }: ProjectsPageProps) {
 
     // Type filter
     if (typeFilter !== 'all') {
-      if (typeFilter === 'device') {
-        filtered = filtered.filter((project) =>
-          project.description?.toLowerCase().includes('arduino') ||
-          project.description?.toLowerCase().includes('esp32') ||
-          project.description?.toLowerCase().includes('raspberry')
-        );
-      } else if (typeFilter === 'web') {
-        filtered = filtered.filter((project) =>
-          project.description?.toLowerCase().includes('web') ||
-          project.description?.toLowerCase().includes('docker')
-        );
+            if (typeFilter === 'device') {
+          filtered = filtered.filter((project: any) =>
+            ['Arduino', 'ESP32', 'raspberry-pi'].includes(project.deviceType)
+          );
+        } else if (typeFilter === 'web') {
+          filtered = filtered.filter((project: any) => project.deviceType === 'web-app');
+        } else if (typeFilter === 'mobile') {
+          filtered = filtered.filter((project: any) => project.deviceType === 'mobile-app');
+        }
       }
-    }
 
     // Sort
     filtered.sort((a, b) => {
@@ -103,15 +101,17 @@ export function ProjectsPage({ user, onLogout }: ProjectsPageProps) {
     setFilteredProjects(filtered);
   };
 
-  const getProjectType = (project: any) => {
-    const desc = project.description?.toLowerCase() || '';
-    if (desc.includes('arduino') || desc.includes('esp32') || desc.includes('raspberry')) {
-      return { type: 'Device', icon: Cpu, color: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' };
-    } else if (desc.includes('web') || desc.includes('docker')) {
-      return { type: 'Web App', icon: Code, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' };
-    }
-    return { type: 'General', icon: FolderGit2, color: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' };
-  };
+const getProjectType = (project: any) => {
+  const dt = project.deviceType;
+  if (dt === 'Arduino' || dt === 'ESP32' || dt === 'raspberry-pi') {
+    return { type: 'Device', icon: Cpu, color: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' };
+  } else if (dt === 'web-app') {
+    return { type: 'Web App', icon: Code, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' };
+  } else if (dt === 'mobile-app') {
+    return { type: 'Mobile App', icon: Smartphone, color: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' };
+  }
+  return { type: 'General', icon: FolderGit2, color: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' };
+};
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -178,7 +178,8 @@ export function ProjectsPage({ user, onLogout }: ProjectsPageProps) {
                   <SelectContent>
                     <SelectItem value="all">All Types</SelectItem>
                     <SelectItem value="device">Embedded Systems Projects</SelectItem>
-                    <SelectItem value="web">Web App Projects</SelectItem>
+                    <SelectItem value="web">Web Application Projects</SelectItem>
+                              <SelectItem value="mobile">Mobile Application Projects</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
