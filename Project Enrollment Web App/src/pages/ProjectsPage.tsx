@@ -47,6 +47,20 @@ export function ProjectsPage({ user, onLogout }: ProjectsPageProps) {
     filterAndSortProjects();
   }, [searchQuery, typeFilter, sortBy, projects]);
 
+  // Reset typeFilter to 'all' if the selected type no longer has any projects
+  useEffect(() => {
+    if (typeFilter !== 'all') {
+      const TYPE_DEVICE_MAP: Record<string, string[]> = {
+        device: ['Arduino', 'ESP32', 'raspberry-pi'],
+        web: ['web-app'],
+        mobile: ['mobile-app'],
+      };
+      const validDeviceTypes = TYPE_DEVICE_MAP[typeFilter] || [];
+      const hasProjects = projects.some(p => validDeviceTypes.includes(p.deviceType));
+      if (!hasProjects) setTypeFilter('all');
+    }
+  }, [projects, typeFilter]);
+
   const loadProjects = async () => {
     try {
       const repos = await giteaAPI.getRepositories();
@@ -137,6 +151,15 @@ const getProjectType = (project: any) => {
     );
   }
 
+    // Derive available filter options from existing projects
+  const TYPE_OPTIONS = [
+    { value: 'device', label: 'Embedded Systems Projects', deviceTypes: ['Arduino', 'ESP32', 'raspberry-pi'] },
+    { value: 'web', label: 'Web Application Projects', deviceTypes: ['web-app'] },
+    { value: 'mobile', label: 'Mobile Application Projects', deviceTypes: ['mobile-app'] },
+  ];
+  const availableTypeFilters = TYPE_OPTIONS.filter(opt =>
+    projects.some(p => opt.deviceTypes.includes(p.deviceType))
+  );
   return (
     <Layout user={user} onLogout={onLogout}>
       <div className="space-y-6">
@@ -177,9 +200,9 @@ const getProjectType = (project: any) => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="device">Embedded Systems Projects</SelectItem>
-                    <SelectItem value="web">Web Application Projects</SelectItem>
-                              <SelectItem value="mobile">Mobile Application Projects</SelectItem>
+            {availableTypeFilters.map(opt => (
+                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                ))}
                   </SelectContent>
                 </Select>
               </div>
