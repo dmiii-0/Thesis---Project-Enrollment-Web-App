@@ -177,8 +177,8 @@ export function ProjectsPage({ user, onLogout }: ProjectsPageProps) {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="device">Device Projects</SelectItem>
-                    <SelectItem value="web">Web Projects</SelectItem>
+                    <SelectItem value="device">Embedded Systems Projects</SelectItem>
+                    <SelectItem value="web">Web App Projects</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
