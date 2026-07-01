@@ -1,4 +1,4 @@
-# Project Description
+# Flash Point
 
 This is a Project Enrollment Web App that the students can use as a project library.
 
